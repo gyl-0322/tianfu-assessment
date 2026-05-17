@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI皮纹天赋速测 - 免费体验</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        
+        .hand {
+            margin-bottom: 30px;
+        }
+        
+        .hand-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .finger {
+            margin-bottom: 15px;
+        }
+        
+        .finger-name {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .patterns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .pattern-btn {
+            flex: 1;
+            min-width: 60px;
+            padding: 10px 5px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .pattern-btn:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+        }
+        
+        .pattern-btn.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+        
+        .pattern-icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        button.submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        
+        button.submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button.submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+        }
+        
+        .result {
+            display: none;
+            padding: 20px;
+            background: #f5f7ff;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .result h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .result-content {
+            line-height: 1.8;
+            color: #333;
+            white-space: pre-wrap;
+        }
+        
+        .restart {
+            width: 100%;
+            padding: 12px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI皮纹天赋速测</h1>
+        <p class="subtitle">免费体验 · 科学解读 · 发现天赋</p>
+        
+        <div id="form">
+            <div class="hand">
+                <div class="hand-title">🖐️ 右手</div>
+                
+                <div class="finger">
+                    <div class="finger-name">拇指</div>
+                    <div class="patterns">
+                        <div class="pattern-btn" data-finger="right-thumb" data-pattern="A" onclick="selectPattern(this)">
+                            <span class="pattern-icon">🌀</span>
+                            <span>斗形</span>
+                        </div>
+                        <div class="pattern-btn" data-finger="right-thumb" data-pattern="B" onclick="selectPattern(this)">
+                            <span class="pattern-icon">📐</span>
+                            <span>箕形(小指)</span>
+                        </div>
+                        <div class="pattern-btn" data-finger="right-thumb" data-pattern="C" onclick="selectPattern(this)">
+                            <span class="pattern-icon">📏</span>
+                            <span>箕形(拇指)</span>
+                        </div>
+                        <div class="pattern-btn" data-finger="right-thumb" data-pattern="D" onclick="selectPattern(this)">
+                            <span class="pattern-icon">🌉</span>
+                            <span>弓形</span>
+                        </div>
+                        <div class="pattern-btn" data-finger="right-thumb" data-pattern="E" onclick="selectPattern(this)">
+                            <span class="pattern-icon">⛺</span>
+                            <span>帐形</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="finger">
+                    <div class="finger-name">食指</div>
+                    <div class="patterns">
+                        <div class="pattern-btn" data-finger="right-index" data-pattern="A" onclick="selectPattern(this)">🌀斗形</div>
+                        <div class="pattern-btn" data-finger="right-index" data-pattern="B" onclick="selectPattern(this)">📐箕形(小指)</div>
+                        <div class="pattern-btn" data-finger="right-index" data-pattern="C" onclick="selectPattern(this)">📏箕形(拇指)</div>
+                        <div class="pattern-btn" data-finger="right-index" data-pattern="D" onclick="selectPattern(this)">🌉弓形</div>
+                        <div class="pattern-btn" data-finger="right-index" data-pattern="E" onclick="selectPattern(this)">⛺帐形</div>
+                    </div>
+                </div>
+                
+                <div class="finger">
+                    <div class="finger-name">中指</div>
+                    <div class="patterns">
+                        <div class="pattern-btn" data-finger="right-middle" data-pattern="A" onclick="selectPattern(this)">🌀斗形</div>
+                        <div class="pattern-btn" data-finger="right-middle" data-pattern="B" onclick="selectPattern(this)">📐箕形(小指)</div>
+                        <div class="pattern-btn" data-finger="right-middle" data-pattern="C" onclick="selectPattern(this)">📏箕形(拇指)</div>
+                        <div class="pattern-btn" data-finger="right-middle" data-pattern="D" onclick="selectPattern(this)">🌉弓形</div>
+                        <div class="pattern-btn" data-finger="right-middle" data-pattern="E" onclick="selectPattern(this)">⛺帐形</div>
+                    </div>
+                </div>
+                
+                <div class="finger">
+                    <div class="finger-name">无名指</div>
+                    <div class="patterns">
+                        <div class="pattern-btn" data-finger="right-ring" data-pattern="A" onclick="selectPattern(this)">🌀斗形</div>
+                        <div class="pattern-btn" data-finger="right-ring" data-pattern="B" onclick="selectPattern(this)">📐箕形(小指)</div>
+                        <div class="pattern-btn" data-finger="right-ring" data-pattern="C" onclick="selectPattern(this)">📏箕形(拇指)</div>
+                        <div class="pattern-btn" data-finger="right-ring" data-pattern="D" onclick="selectPattern(this)">🌉弓形</div>
+                        <div class="pattern-btn" data-finger="right-ring" data-pattern="E" onclick="selectPattern(this)">⛺帐形</div>
+                    </div>
+                </div>
+                
+                <div class="finger">
+                    <div class="finger-name">小指</div>
+                    <div class="patterns">
+                        <div class="pattern-btn" data-finger="right-pinky" data-pattern="A" onclick="selectPattern(this)">🌀斗形</div>
+                        <div class="pattern-btn" data-finger="right-pinky" data-pattern="B" onclick="selectPattern(this)">📐箕形(小指)</div>
+                        <div class="pattern-btn" data-finger="right-pinky" data-pattern="C" onclick="selectPattern(this)">📏箕形(拇指)</div>
+                        <div class="pattern-btn" data-finger="right-pinky" data-pattern="D" onclick="selectPattern(this)">🌉弓形</div>
+                        <div class="pattern-btn" data-finger="right-pinky" data-pattern="E" onclick="selectPattern(this)">⛺帐形</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hand">
+                <div class="hand-title">🖐️ 左手</div>
+                
+                <div class="finger">
+                    <div class="finger-name">拇指</div>
+                    <div class="patterns">
+                        <div class="pattern-btn" data-finger="left-thumb" data-pattern="A" onclick="selectPattern(this)">🌀斗形</div>
+                        <div class="pattern-btn" data-finger="left-thumb" data-pattern="B" onclick="selectPattern(this)">📐箕形(小指)</div>
+                        <div class="pattern-btn" data-finger="left-thumb" data-pattern="C" onclick="selectPattern(this)">📏箕形(拇指)</div>
+                        <div class="pattern-btn" data-finger="left-thumb" data-pattern="D" onclick="selectPattern(this)">🌉弓形</div>
+                        <div class="pattern-btn" data-finger="left-thumb" data-pattern="E" onclick="selectPattern(this)">⛺帐形</div>
+                    </div>
+                </div>
+                
+                <div class="finger">
+                    <div class="finger-name">食指</div>
+                    <div class="patterns">
+                        <div class="pattern-btn" data-finger="left-index" data-pattern="A" onclick="selectPattern(this)">🌀斗形</div>
+                        <div class="pattern-btn" data-finger="left-index" data-pattern="B" onclick="selectPattern(this)">📐箕形(小指)</div>
+                        <div class="pattern-btn" data-finger="left-index" data-pattern="C" onclick="selectPattern(this)">📏箕形(拇指)</div>
+                        <div class="pattern-btn" data-finger="left-index" data-pattern="D" onclick="selectPattern(this)">🌉弓形</div>
+                        <div class="pattern-btn" data-finger="left-index" data-pattern="E" onclick="selectPattern(this)">⛺帐形</div>
+                    </div>
+                </div>
+                
+                <div class="finger">
+                    <div class="finger-name">中指</div>
+                    <div class="patterns">
+                        <div class="pattern-btn" data-finger="left-middle" data-pattern="A" onclick="selectPattern(this)">🌀斗形</div>
+                        <div class="pattern-btn" data-finger="left-middle" data-pattern="B" onclick="selectPattern(this)">📐箕形(小指)</div>
+                        <div class="pattern-btn" data-finger="left-middle" data-pattern="C" onclick="selectPattern(this)">📏箕形(拇指)</div>
+                        <div class="pattern-btn" data-finger="left-middle" data-pattern="D" onclick="selectPattern(this)">🌉弓形</div>
+                        <div class="pattern-btn" data-finger="left-middle" data-pattern="E" onclick="selectPattern(this)">⛺帐形</div>
+                    </div>
+                </div>
+                
+                <div class="finger">
+                    <div class="finger-name">无名指</div>
+                    <div class="patterns">
+                        <div class="pattern-btn" data-finger="left-ring" data-pattern="A" onclick="selectPattern(this)">🌀斗形</div>
+                        <div class="pattern-btn" data-finger="left-ring" data-pattern="B" onclick="selectPattern(this)">📐箕形(小指)</div>
+                        <div class="pattern-btn" data-finger="left-ring" data-pattern="C" onclick="selectPattern(this)">📏箕形(拇指)</div>
+                        <div class="pattern-btn" data-finger="left-ring" data-pattern="D" onclick="selectPattern(this)">🌉弓形</div>
+                        <div class="pattern-btn" data-finger="left-ring" data-pattern="E" onclick="selectPattern(this)">⛺帐形</div>
+                    </div>
+                </div>
+                
+                <div class="finger">
+                    <div class="finger-name">小指</div>
+                    <div class="patterns">
+                        <div class="pattern-btn" data-finger="left-pinky" data-pattern="A" onclick="selectPattern(this)">🌀斗形</div>
+                        <div class="pattern-btn" data-finger="left-pinky" data-pattern="B" onclick="selectPattern(this)">📐箕形(小指)</div>
+                        <div class="pattern-btn" data-finger="left-pinky" data-pattern="C" onclick="selectPattern(this)">📏箕形(拇指)</div>
+                        <div class="pattern-btn" data-finger="left-pinky" data-pattern="D" onclick="selectPattern(this)">🌉弓形</div>
+                        <div class="pattern-btn" data-finger="left-pinky" data-pattern="E" onclick="selectPattern(this)">⛺帐形</div>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="submit" onclick="generateReport()">🚀 生成天赋报告</button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <p>🤖 AI正在分析您的皮纹数据...</p>
+            <p>请稍候...</p>
+        </div>
+        
+        <div class="result" id="result">
+            <h2>🎯 您的天赋特质报告</h2>
+            <div class="result-content" id="reportContent"></div>
+            <button class="restart" onclick="restart()">重新测试</button>
+        </div>
+    </div>
+    
+    <script>
+        const selections = {};
+        
+        function selectPattern(btn) {
+            const finger = btn.dataset.finger;
+            const pattern = btn.dataset.pattern;
+            
+            // Remove selected class from siblings
+            const parent = btn.parentElement;
+            parent.querySelectorAll('.pattern-btn').forEach(b => b.classList.remove('selected'));
+            
+            // Add selected class to clicked button
+            btn.classList.add('selected');
+            
+            // Save selection
+            selections[finger] = pattern;
+        }
+        
+        async function generateReport() {
+            // Check if all fingers are selected
+            const fingers = [
+                'right-thumb', 'right-index', 'right-middle', 'right-ring', 'right-pinky',
+                'left-thumb', 'left-index', 'left-middle', 'left-ring', 'left-pinky'
+            ];
+            
+            const missing = fingers.filter(f => !selections[f]);
+            if (missing.length > 0) {
+                alert('请完成所有10个手指的选择！');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('form').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            
+            // Prepare prompt
+            const prompt = `【角色】你是皮纹天赋解读专家
+            
+【输入】用户选择了10个手指的纹型：
+右手拇指=${selections['right-thumb']}, 右手食指=${selections['right-index']}, 
+右手中指=${selections['right-middle']}, 右手无名指=${selections['right-ring']}, 右手小指=${selections['right-pinky']},
+左手拇指=${selections['left-thumb']}, 左手食指=${selections['left-index']}, 
+左手中指=${selections['left-middle']}, 左手无名指=${selections['left-ring']}, 左手小指=${selections['left-pinky']}
+
+【纹型含义】
+A=斗形纹：独立、有目标感、专注
+B=箕形纹（小指侧）：外向、善社交、适应力强
+C=箕形纹（大拇指侧）：创新、好奇心强、独立
+D=弓形纹：脚踏实地、可靠、务实
+E=帐形纹：有洞察力、直觉强、创意
+
+【输出要求】
+生成一份约800字的"性格倾向与天赋特质报告"，包含：
+1. 核心天赋特质（3-4个关键词，用🔑标注）
+2. 性格优势分析（300字）
+3. 学习风格与成长建议（300字）
+4. 适合的发展方向（200字）
+
+【格式要求】
+- 用温暖的语气
+- 用emoji让报告更生动
+- 给出具体可操作的建议
+- 鼓励性语言，避免绝对化`;
+            
+            try {
+                // Call backend API
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('reportContent').innerText = data.report;
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('result').style.display = 'block';
+                } else {
+                    alert('生成报告失败，请重试！');
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('form').style.display = 'block';
+                }
+            } catch (error) {
+                alert('网络错误，请重试！');
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('form').style.display = 'block';
+            }
+        }
+        
+        function restart() {
+            // Reset selections
+            for (const key in selections) {
+                delete selections[key];
+            }
+            
+            // Reset UI
+            document.querySelectorAll('.pattern-btn').forEach(b => b.classList.remove('selected'));
+            
+            // Show form
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('form').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
