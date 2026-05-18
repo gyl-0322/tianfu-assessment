@@ -1,0 +1,11 @@
+# 保护API Key
+.env
+
+# 依赖
+node_modules/
+
+# 缩略图（可选）
+thumbs/
+
+# macOS
+.DS_Store

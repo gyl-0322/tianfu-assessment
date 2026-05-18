@@ -19,7 +19,7 @@
             margin: 0 auto;
             background: #fff;
             border-radius: 20px;
-            overflow: hidden;
+            overflow-x: hidden;
             box-shadow: 0 20px 60px rgba(0,0,0,0.25);
         }
 
@@ -62,6 +62,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
+            width: 100%;
         }
 
         .finger-card {
@@ -69,6 +70,9 @@
             border-radius: 12px;
             padding: 10px;
             background: #fafafe;
+            box-sizing: border-box;
+            width: 100%;
+            min-width: 0;
         }
 
         .finger-name {
@@ -83,6 +87,8 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 5px;
+            width: 100%;
+            min-width: 0;
         }
 
         .pattern-btn {
@@ -118,9 +124,11 @@
 
         /* SVG pattern icons */
         .pattern-svg {
-            width: 28px;
-            height: 28px;
-            margin-bottom: 2px;
+            width: 100%;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .pattern-label {
@@ -128,10 +136,18 @@
             color: #888;
             text-align: center;
             line-height: 1.1;
+            margin-top: 1px;
         }
 
         .pattern-btn.selected .pattern-label {
             color: rgba(255,255,255,0.9);
+        }
+
+        .pattern-img {
+            width: 100%;
+            height: 36px;
+            object-fit: contain;
+            display: block;
         }
 
         /* Pattern color themes */
@@ -159,9 +175,13 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            width: calc(100% - 40px);
+            width: auto;
+            max-width: calc(100% - 40px);
+            min-width: 200px;
             letter-spacing: 1px;
             transition: transform 0.2s, box-shadow 0.2s;
+            display: block;
+            box-sizing: border-box;
         }
 
         .submit-btn:hover {
@@ -302,9 +322,31 @@
 
         .pattern-help strong { display: block; margin-bottom: 3px; }
 
-        @media (max-width: 400px) {
+        @media (max-width: 600px) {
             .finger-grid { grid-template-columns: 1fr; }
+            .finger-card { width: 100%; max-width: 100%; }
+            .submit-btn { width: auto; margin: 15px 15px 20px; font-size: 15px; }
         }
+        @media (max-width: 500px) {
+            .pattern-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+            .pattern-label { font-size: 8px; }
+            .pattern-img { height: 30px; }
+            .header h1 { font-size: 18px; }
+            .report-section h3 { font-size: 13px; }
+            .report-section p { font-size: 13px; }
+            body { padding: 10px; }
+            .container { border-radius: 15px; }
+        }
+        @media (max-width: 380px) {
+            .pattern-grid { grid-template-columns: repeat(4, 1fr); gap: 3px; }
+            .pattern-label { font-size: 7px; }
+        }
+        img { max-width: 100%; height: auto; }
+
+        /* Prevent right-side overflow globally */
+        body { overflow-x: hidden; }
+        * { max-width: 100%; }
+        pre, code { white-space: pre-wrap; word-break: break-all; }
     </style>
 </head>
 <body>
@@ -403,16 +445,18 @@
 
     <script>
         // 8 fingerprint patterns with SVG icons
-        const PATTERNS = [
-            { code: 'Ws', name: '螺旋斗', desc: '螺旋向外', svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="3" fill="#e74c3c"/><path d="M20 20 C24 16, 26 20, 24 24 C22 28, 16 28, 14 22 C12 16, 18 12, 24 14 C30 16, 32 24, 26 28 C20 32, 12 28, 10 20 C8 12, 18 6, 28 10" stroke="#e74c3c" stroke-width="2" fill="none"/></svg>` },
-            { code: 'Wt', name: '靶心斗', desc: '同心圆', svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="3" fill="#e67e22"/><circle cx="20" cy="20" r="7" stroke="#e67e22" stroke-width="2"/><circle cx="20" cy="20" r="11" stroke="#e67e22" stroke-width="1.5"/><circle cx="20" cy="20" r="14" stroke="#e67e22" stroke-width="1"/></svg>` },
-            { code: 'We', name: '伸长斗', desc: '细长椭圆', svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="20" cy="20" rx="5" ry="12" stroke="#f39c12" stroke-width="2"/><ellipse cx="20" cy="20" rx="9" ry="15" stroke="#f39c12" stroke-width="1.5"/><ellipse cx="20" cy="20" rx="12" ry="17" stroke="#f39c12" stroke-width="1"/></svg>` },
-            { code: 'Wc', name: '双斗', desc: '两个斗环绕', svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="15" cy="17" r="5" stroke="#9b59b6" stroke-width="2"/><circle cx="25" cy="23" r="5" stroke="#9b59b6" stroke-width="2"/><path d="M15 17 Q20 20, 25 23" stroke="#9b59b6" stroke-width="1.5"/><circle cx="15" cy="17" r="2" fill="#9b59b6"/><circle cx="25" cy="23" r="2" fill="#9b59b6"/></svg>` },
-            { code: 'Wd', name: '双箕斗', desc: '双箕环绕', svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 30 Q15 10, 20 20 Q25 30, 32 10" stroke="#8e44ad" stroke-width="2" fill="none"/><path d="M8 25 Q15 15, 20 22 Q25 28, 32 15" stroke="#8e44ad" stroke-width="1.5" fill="none"/></svg>` },
-            { code: 'Lu', name: '正箕纹', desc: '水流向小指', svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 35 Q14 20, 20 22 Q26 24, 30 10" stroke="#3498db" stroke-width="2.5" fill="none"/><path d="M12 35 Q16 22, 20 23 Q24 24, 28 12" stroke="#3498db" stroke-width="1.5" fill="none"/><circle cx="22" cy="24" r="2" fill="#3498db"/></svg>` },
-            { code: 'Rl', name: '反箕纹', desc: '水流向拇指', svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 10 Q14 20, 20 18 Q26 16, 30 35" stroke="#1abc9c" stroke-width="2.5" fill="none"/><path d="M12 12 Q16 21, 20 19 Q24 17, 28 33" stroke="#1abc9c" stroke-width="1.5" fill="none"/><circle cx="18" cy="16" r="2" fill="#1abc9c"/></svg>` },
-            { code: 'X', name: '弧形纹', desc: '无三叉点', svg: `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 30 Q12 18, 20 20 Q28 22, 34 30" stroke="#95a5a6" stroke-width="2.5" fill="none"/><path d="M8 28 Q14 20, 20 21 Q26 22, 32 28" stroke="#95a5a6" stroke-width="1.5" fill="none"/></svg>` }
-        ];
+        const FINGER_IMGS = {
+            Ws: 'data:image/jpeg;base64,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',
+            Wt: 'data:image/jpeg;base64,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',
+            We: 'data:image/jpeg;base64,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',
+            Wc: 'data:image/jpeg;base64,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',
+            Wd: 'data:image/jpeg;base64,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',
+            Lu: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABALDA4MChAODQ4SERATGCgaGBYWGDEjJR0oOjM9PDkzODdASFxOQERXRTc4UG1RV19iZ2hnPk1xeXBkeFxlZ2P/2wBDARESEhgVGC8aGi9jQjhCY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2P/wAARCABQAEQDASIAAhEBAxEB/8QAGwAAAQUBAQAAAAAAAAAAAAAAAAECAwQGBQf/xAA1EAACAQIEAwYEBAcBAAAAAAABAhEAAwQSITEFQVETImFxgaEyUpGxBiPB8BQVFjNCgqJy/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/APQKKznG+M4jBY9sPauKvcVl/LnUzp5mJ9PGqR/EWPZQbb2idvgkT1HUfeB81BsKKyY4/jjIzW5jYKJ16ddiOnxHYau/qDGTmm3kJ+TQevMfs5aDVUVll4/jE0e5YJ8QPtI/XzqP+oca17+5ZCiQygaHyOse/pQa2isle49xC0QrNbkCTFvlHn4j23BkJa49xB4LPaAZZGVBv01Pj7joaDW0VBgrzX8HZuuVLOgYldtqKDK/ilVPGrZzxFsZgqmYMwPM6+Vc1smTVszb90R019wR5r8tdP8AFAB4sAVU/lA+J30+/tXHzkgnXU7nQCd4/fOgsqqM2QqJC8hpBA5eWXTpkXmaZqmYZokj4obyG2vgI8QNoZbZzhJTNOYDLl311/X1YVF1DSZ0zZtTuTryETJGyjT4qCVnFvU3BK6AZgCI5bmPWKdhw1wjMCxM5dwN+sn2MeZ0qK3ftgGyHmTEZVGXoAoOYDprPrVzBEFmAIIZSFJjRgNNdmkczuDrzFAXw/8ADIzBc8RmGgPh9/CJOneFVLNsIWhSLa91VP8Alv8ATmPU9au4i6/ZFA7ZiVlSYk/N1309AeRmihUsrNeTLzLGCduX6eFBvuGGeG4Ykkns11Ig7c/GijhpnhuGMz+WuvpRQcD8S2c2PBV+8UBgCYOsH2NcFmULlUkiQoJHXQexWtDx9F/mIzuFDIuwljr0noG1riYjsrDBbdgsV7uZzJ05x+96CM3SmGVgSogwW01ifuoqrdZmtZWTMokaNGVcwB9gvpV1bqm3MW/yhK5pI2VgP+fq1UGRkylZZ1gSG3jQnoCRE8vKgVwT2Wa5nLaKMpHlHQGCIjbrE1ZS6yt2QBie7oACRJGvlP1NQLczkgMIjMpkEz1gE6DmSeWlTWCrurfMRAB3G438CPegjum6FMFfh5+5pEXMzHlJMxoBzJ99aku22lQxhGmFMQd/U0WSifAApAjvbjmP0oN9woMOFYQP8QtLOnhRScJKnhOEKgqOyWAdxptRQcbj1q4OItdAkG0ACskjltt/ka4uIKaXwAbg1EiCu0a9Z5eBrQ8btXXxLG0i3IQFhcQlQNQQD1idBXGvoWfIcG4YCVEFp8gRpP8A6B0BoK2Fsg3JZVIYQqFsxafL1211kbCmYkJ2vfGVtUSIEDwggc+RnwE1e/gcTbwdwKmWIYhkkyd9CPaB1mqNzAYoKymxfJUCe4STqBtGunXxNBB2L20IYgAnTOpX66Zj5Aa0lkWzdyAmEaHziJnUk9Ce8Y6AVOcLiA7AW7gCyMvZsDP+oE+9MuYDEqj5LF4INAVtFfpI09BNA7Est24HghpJGk767fSmrbVh8QeREgEEiDI1/wBv+als4S6wVuwuEKQJ7Jp0A2lRPh9OlWUwd+QVS8vdA0Q90+HWIX6DqaDX8Mzfy3DZ2Vm7NZZRAOm9FLw4MOH4cMoU9mJA2GlFBDiMYmG4mFvY21btCzmNlk1nMAGze0VctXbd5S1tgwBKkjqNDStbR/iRW8xNOAA2oCilooEopaKBKKWigSiiig//2Q==',
+            Rl: 'data:image/jpeg;base64,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',
+            X: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDABALDA4MChAODQ4SERATGCgaGBYWGDEjJR0oOjM9PDkzODdASFxOQERXRTc4UG1RV19iZ2hnPk1xeXBkeFxlZ2P/2wBDARESEhgVGC8aGi9jQjhCY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2NjY2P/wAARCABQAEQDASIAAhEBAxEB/8QAGwAAAgMBAQEAAAAAAAAAAAAAAAQBAgMFBgf/xAA0EAACAQMCAwUHAgcBAAAAAAABAhEAAyEEEgUxQRMiUWFxMoGRobHB8AZCFBUjYtHh8dL/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8A+gUUhquJrptSbBtOxAVpHKCftQeK2lZQ6ld0x5x1+R+FA/RSK8RRoBQgnkCQJoHEQQD2ZyxXDCgeornvxS2pUbDLGBkVXUcWTTkF7R2kYO4ZoOlRXKHG0kg2jgxhpz1+VTc41bt2nc2mYochSDA8aDp0VnYui/Yt3QIDqGA9aKDk8YYWr24EB22wZOInJ+fw8qXtpcdRuYSSVG7J58h8Pkatxa1dfihgKLZVDk4Yg/8APw1nYR0CliQxXIxIj1/OfjQM3CzAoXyYMkZk/bFLk27ZktKrHM/MVe477cAnfALA59IrBr1hTuuggN3BnMigm7cVxuDBlMEO3mOVA7U2MgNuxt5sINKIhNpmfcBE7Qw9w9aNP2r29peFB9kmJxn8/CF+2i53AT3DzHOeg/36VZGuOh2GJMKQBGPGTVLTG1Nu0YA6jMdBn5++tP6YPZ3LKss7e8JA659T4eVB6TRArorAYyRbE5np40VOjzo7J/sH0ooOHxe5s4s24nb2a4HTnn1/81la2wTdbvkzjr5esiaX/UZP89A7bYvZqzArOMj5Ca2sXFtWn7tu4eYLiAI8h1MGguL7MXIwF5lfUdaX1IS4gtswMA91QASKgXg9xrUW1BMdwRyxiruS14wg3Hu4xMetAmyhE2KJWAQ5PWmdNbKlN0wTmc1JS2ttwQsbjndJ64plLEQrDaNoI8gR9ZFBz9Q+0u6QqqAQoPmZ/POsWZ2dXALI6EkAEgYNPX0d7z71RbjEggmFmJ+n0rG3i/2jNtUCJH7uuB+ZoPU8LM8M0pgibS4PTFFW4eANBp4II7MER6UUHmP1JtHGCzhCFtowkSeZnH+YAzVLFw/wu26CjAHYREs0RnwEsab47w3V6ri7PZsO1p7aKXEQCCfePUfA1N3R69yCdECQkkgAN4QCMT5H48oBBVHaPunbHMgRk/Wmbd0tbAJnxAE5qU0GsZih0NwIwMy4yfGenIVrpeH622iqbBG3yGZ8c+mPL30GYU99WIls+xIA/B9euKZCt2TIwvBds+B/7/qtBw++wLlCHGVPKT8cdKm5pNQLJAtOz/tKwPvQc5VdZ3DezGGExk5HPnmaoEm6guqEtLJNsZWTj7TTtzhurLoUDqsZK89w5YNL6fheuZrvb2mXopIBnnBkHxg+goPSaHadDp9vs9msfCip0i7NJaXYyQo7rGSvlNFAtqLoscRF17mqKizHZKk28sM8va+1OWrguqWCsIYr3hHIxV6KAoqaKCKKmigiipooIooooP/Z',
+        };
+        const PATTERN_NAMES = {"Ws": "螺旋斗", "Wt": "靶心斗", "We": "伸长斗", "Wc": "双斗(I)", "Wd": "双斗(II)", "Lu": "正箕", "Rl": "反箕", "X": "弧形"};
+
 
         // Finger definitions
         const FINGERS = [
@@ -444,13 +488,13 @@
                     grid.parentElement.insertBefore(note, grid);
                 }
 
-                PATTERNS.forEach(p => {
+                Object.keys(FINGER_IMGS).forEach(code => { const p = { code: code, name: PATTERN_NAMES[code] || code };
                     const btn = document.createElement('div');
                     btn.className = 'pattern-btn';
                     btn.dataset.finger = finger.id;
                     btn.dataset.pattern = p.code;
                     btn.title = `${p.name}（${p.desc}）`;
-                    btn.innerHTML = `<div class="pattern-svg">${p.svg}</div><div class="pattern-label">${p.name}</div>`;
+                    btn.innerHTML = `<img class="pattern-img" src="${FINGER_IMGS[p.code] || ''}" alt="${p.name}" /><div class="pattern-label">${p.name}</div>`;
                     btn.onclick = () => selectPattern(btn);
                     grid.appendChild(btn);
                 });
@@ -485,19 +529,80 @@
             }
         }
 
+        
+function buildAIPrompt(summary, types) {
+    return `【角色】你是皮纹天赋解读专家，10年实战经验，解读过3000+案例。
+你的风格：温暖、专业、鼓励性，用丰富的emoji让报告生动易读。
+
+【用户输入】10个手指纹型选择：
+${summary}
+
+【性格类型】${types.mainType}（${types.tagline}）
+
+【任务】请基于以上纹型组合，生成一份详细的皮纹天赋分析报告，包含：
+1. 🔑 核心天赋（3-4个关键词，用emoji标注）
+2. ⭐ 性格优势（150字，温暖鼓励风格，用具体场景说明）
+3. 📚 学习风格（150字，给出2-3个具体学习建议）
+4. 🎯 发展方向（推荐2-3个适合的职业/角色方向，简要说明原因）
+5. 💡 给家长/自己的建议（100字，实用可操作）
+
+【要求】
+- 避免绝对化表述（如"一定""必须"），用"倾向于""更适合"等
+- 每个段落用emoji开头，增加可读性
+- 报告要有温度，让读者感到被理解和鼓励
+- 基于皮纹学原理，但不要堆砌术语`;
+}
+
         async function generateReport() {
             document.getElementById('form').style.display = 'none';
             document.getElementById('loadingScreen').style.display = 'block';
 
             // Build selection summary
             const summary = FINGERS.map(f => {
-                const p = PATTERNS.find(pp => pp.code === selections[f.id]);
+                const p = FINGER_IMGS[selections[f.id]] ? { code: selections[f.id], name: selections[f.id], img: FINGER_IMGS[selections[f.id]] } : null;
                 return `${f.name}：${p ? p.name : selections[f.id]}`;
             }).join('\n');
 
             // Analyze type
             const typeInfo = analyzeType(selections);
+            const types = analyzeTypeDisplay(selections);
 
+            // === API MODE: Try AI first, fallback to local ===
+            try {
+                const prompt = buildAIPrompt(summary, types);
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt, selections, typeInfo: JSON.stringify(typeInfo) })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success && data.report) {
+                        // Show AI-generated report
+                        document.getElementById('loadingScreen').style.display = 'none';
+                        document.getElementById('resultScreen').style.display = 'block';
+                        document.getElementById('resultType').textContent = types.mainType;
+                        document.getElementById('resultTagline').textContent = types.tagline;
+                        document.getElementById('reportContent').innerHTML = data.report;
+                        return;
+                    }
+                }
+                console.log('API unavailable, using local fallback');
+            } catch (error) {
+                console.log('API error:', error.message, '- using local fallback');
+            }
+
+            // === LOCAL FALLBACK: Generate report without API ===
+            const localReport = generateLocalReport(selections, types, summary);
+            
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'block';
+            document.getElementById('resultType').textContent = types.mainType;
+            document.getElementById('resultTagline').textContent = types.tagline;
+            document.getElementById('reportContent').innerHTML = localReport;
+
+            // === API MODE (kept for future use) ===
             const prompt = `【角色】你是皮纹天赋解读专家，10年实战经验，解读过3000+案例。
 
 【用户输入】10个手指纹型选择：
@@ -596,19 +701,112 @@ ${typeInfo}`;
             const vals = Object.values(sel);
             const thumbs = [sel['right-thumb'], sel['left-thumb']];
             const hasRl = vals.includes('Rl');
-            const hasArc = vals.some(v => v === 'X' || v === 'Xn');
+            const arcCount = vals.filter(v => v === 'X' || v === 'Xn').length;
             const douCount = vals.filter(v => ['Ws','Wt','We'].includes(v)).length;
             const wcCount = vals.filter(v => ['Wc','Wd'].includes(v)).length;
             const luCount = vals.filter(v => ['Lu'].includes(v)).length;
 
             if (hasRl) return { mainType: '🔄 逆思型 R', tagline: '逆向思考 · 创意非凡 · 与众不同' };
             if (vals.every(v => ['Ws','Wt','We','Wc','Wd'].includes(v)) && thumbs.every(t => ['Ws','Wt','We'].includes(t))) return { mainType: '👑 超级认知型 W', tagline: '唯我独尊 · 领袖风范 · 王者之气' };
-            if (vals.every(v => ['Lu','X','Xn'].includes(v)) && thumbs.every(t => ['Lu','X','Xn'].includes(t))) return { mainType: '💝 超级模仿型 L', tagline: '敞开接纳 · 大公无私 · 奉献型' };
-            if (thumbs.some(t => ['X','Xn'].includes(t)) || vals.filter(v=>v==='X'||v==='Xn').length >= 6) return { mainType: '🌊 开放型 X', tagline: '海绵学习 · 踏实肯干 · 简单极致' };
+            // Open type: thumb is arc OR 6+ arcs (check before super-mimic)
+            if (thumbs.some(t => t === 'X' || t === 'Xn') || arcCount >= 6) return { mainType: '🌊 开放型 X', tagline: '海绵学习 · 踏实肯干 · 简单极致' };
+            // Super mimic: all non-dou, no arcs in thumbs, mostly Lu
+            if (vals.every(v => v === 'Lu') && thumbs.every(t => t === 'Lu')) return { mainType: '💝 超级模仿型 L', tagline: '敞开接纳 · 大公无私 · 奉献型' };
             if (wcCount >= 2 && douCount >= 2) return { mainType: '🎭 整合型 WC', tagline: '灵活善变 · 价值思维 · 多面高手' };
-            if (douCount >= 4) return { mainType: '🧠 认知型 W', tagline: '主见权威 · 好奇心强 · 探索型' };
-            if (luCount >= 4) return { mainType: '🤝 模仿型 L', tagline: '善于模仿 · 适应力强 · 服务型' };
+            if (douCount >= 4 && thumbs.some(t => ['Ws','Wt','We'].includes(t))) return { mainType: '🧠 认知型 W', tagline: '主见权威 · 好奇心强 · 探索型' };
+            if (luCount >= 6 && thumbs.some(t => t === 'Lu')) return { mainType: '🤝 模仿型 L', tagline: '善于模仿 · 适应力强 · 服务型' };
             return { mainType: '🎯 组合型', tagline: '多元特质 · 灵活应变 · 综合型' };
+        }
+
+
+        function generateLocalReport(sel, types, summary) {
+            const vals = Object.values(sel);
+            const thumbs = [sel['right-thumb'], sel['left-thumb']];
+            const hasRl = vals.includes('Rl');
+            const douCount = vals.filter(v => ['Ws','Wt','We'].includes(v)).length;
+            const luCount = vals.filter(v => ['Lu'].includes(v)).length;
+            const wcCount = vals.filter(v => ['Wc','Wd'].includes(v)).length;
+            
+            // Determine type-specific content
+            let talents = '', advantage = '', learning = '', career = '', advice = '';
+            
+            if (hasRl) {
+                talents = '逆向思维 · 创意爆发 · 独特视角 · 挑战常规';
+                advantage = '<p>🌟 你的大脑天生与众不同！反箕纹赋予你<strong>反向思考</strong>的超能力——当别人都在往东走时，你自然而然会想"为什么不能往西？"。这不是叛逆，这是天赋。你擅长发现别人看不到的角度，在艺术创作、程序调试、策略规划等领域往往能给出令人惊叹的方案。</p><p>💡 你的创意不是凭空而来，而是基于对事物本质的深刻理解。给你一个规则，你第一时间想到的不是遵守它，而是思考"这个规则的边界在哪里？"这种能力在创新驱动的工作中极其珍贵。</p>';
+                learning = '<p>📖 <strong>项目式学习</strong>最适合你。与其按部就班听课，不如直接上手做项目——编程、设计、写作、实验都行。<strong>允许质疑</strong>：当你问"为什么要这样做"时，这是你在深度学习，不是捣乱。<strong>给选择权</strong>：让你自己决定学习顺序和方式，效果远超被动接受。</p><p>⚠️ 注意：常规教育体系可能让你感到"格格不入"。这 不是你的问题，是体系的问题。找到能欣赏你独特思维方式的导师或环境。</p>';
+                career = '<p>🎯 <strong>推荐方向：</strong>产品经理、UI/UX设计师、独立开发者、创意总监、数据科学家、创业者</p><p>这些角色都需要"看到别人看不到的"能力，正是你的核心优势。</p>';
+                advice = '<p>💬 <strong>给家长的建议：</strong>请珍惜这份独特性！当孩子总是问"为什么"、总是想"反过来试试"时，不要急着纠正。<strong>保护好奇心 > 强调服从</strong>。给他/她一个可以自由探索的空间（哪怕是一个角落+一台电脑），你会发现惊喜。逆思型的孩子需要的是"对话者"而不是"管理者"。</p>';
+            } else if (types.mainType.includes('超级认知')) {
+                talents = '领袖气质 · 主见坚定 · 目标导向 · 决策力强';
+                advantage = '<p>🌟 你是天生的领导者！10个手指都是斗形纹，意味着你有<strong>极强的自我意识和主见</strong>。"我知道我要什么"是你的人生信条。你不是在跟随潮流，而是在定义方向。</p><p>💡 斗形纹代表目标感和掌控力。你喜欢主导局面，不喜欢被安排。在团队中，你往往自然成为那个"拿主意的人"。这不是傲慢，而是与生俱来的领导力。</p>';
+                learning = '<p>📖 <strong>目标驱动式学习</strong>最有效。先明确"学这个有什么用"，你的动力就会爆棚。<strong>挑战性任务</strong>比重复练习更适合你——你需要感受到"我在征服难题"。<strong>给予决策权</strong>：让你自己制定学习计划，甚至可以选择跳过已掌握的内容。</p><p>⚠️ 注意：你可能对"被要求做"的事情有天然抵触。把"要我做"变成"我要做"，一切都会不同。</p>';
+                career = '<p>🎯 <strong>推荐方向：</strong>CEO/创始人、技术负责人、项目经理、律师、外科医生、投资经理</p><p>这些角色需要强大的决断力和目标感，与你的天赋完美匹配。</p>';
+                advice = '<p>💬 <strong>给家长的建议：</strong>超级认知型的孩子需要"尊重"多于"管教"。给他/她选择权和决策空间，哪怕是小事（如今天穿什么、周末怎么安排）。<strong>讲道理比下命令有效</strong>——这类孩子需要理解"为什么"，而不是被告知"做什么"。</p>';
+            } else if (types.mainType.includes('超级模仿')) {
+                talents = '共情能力强 · 团队协作 · 学习模仿 · 服务精神';
+                advantage = '<p>🌟 你是最温暖的存在！全箕形/弧形纹组合意味着你有<strong>天然的共情能力和适应力</strong>。你能敏锐感知他人的情绪和需求，像海绵一样吸收环境和榜样的影响。</p><p>💡 这不是"没有主见"，而是"开放包容"。你是天生的团队润滑剂，能让每个人都感到被理解和接纳。在教育、服务、协调类工作中，这种能力是无价之宝。</p>';
+                learning = '<p>📖 <strong>榜样学习法</strong>最适合你。找到一个优秀的榜样（老师、学长、偶像），观察并模仿他/她的方法和态度，效果极佳。<strong>环境很重要</strong>：在一个积极向上的群体中，你会自然地吸收好的习惯。<strong>及时反馈</strong>：你需要知道"做得好不好"来调整方向。</p><p>⚠️ 注意：你可能容易受环境影响。选择正向的圈子和朋友，对你来说格外重要。</p>';
+                career = '<p>🎯 <strong>推荐方向：</strong>教师、心理咨询师、人力资源、客户成功经理、护士、社工</p><p>这些角色需要强大的共情能力和服务意识，正是你的核心优势。</p>';
+                advice = '<p>💬 <strong>给家长的建议：</strong>模仿型的孩子是"环境的产物"。<strong>身教 > 言传</strong>——你想让他/她成为什么样的人，自己先做到。创造温暖、稳定的家庭氛围，给孩子明确的正面榜样。避免频繁更换环境（学校、居住地）。</p>';
+            } else if (types.mainType.includes('开放型')) {
+                talents = '踏实肯干 · 海绵学习 · 简单纯粹 · 执行力强';
+                advantage = '<p>🌟 你是最可靠的人！弧形纹为主意味着你<strong>踏实、专注、不复杂</strong>。你不玩心眼，不绕弯子，说一是一，二是二。在这个充满不确定性的世界里，你的"稳"是最稀缺的品质。</p><p>💡 开放型的你像一块干净的海绵——给你什么你就吸收什么。这意味着早期教育和环境对你的影响特别深。一旦形成了好习惯，你会坚持到底；同样，坏习惯也需要尽早纠正。</p>';
+                learning = '<p>📖 <strong>结构化学习</strong>最适合你。清晰的步骤、明确的指令、可量化的目标——这些让你最有安全感。<strong>重复练习</strong>对你很有效，因为你能通过反复来巩固掌握。<strong>少而精</strong>：一次聚焦一件事，彻底学会再进入下一个。</p><p>⚠️ 注意：你可能不太喜欢变化和不确定性。提前告知计划和变化，给你足够的准备时间。</p>';
+                career = '<p>🎯 <strong>推荐方向：</strong>会计师、质检工程师、运营专员、图书馆员、行政主管、技术文档工程师</p><p>这些角色需要细致、耐心和执行力，与你的天赋完美匹配。</p>';
+                advice = '<p>💬 <strong>给家长的建议：</strong>开放型的孩子需要<strong>稳定的环境</strong>和<strong>明确的规则</strong>。不要突然改变计划或规则。用简单清晰的方式沟通，避免复杂的说教。早期建立良好的生活和学习习惯至关重要，因为这些习惯会伴随终身。</p>';
+            } else if (types.mainType.includes('整合型')) {
+                talents = '灵活善变 · 资源整合 · 多面手 · 适应力MAX';
+                advantage = '<p>🌟 你是万金油，更是瑞士军刀！双斗/多斗纹组合赋予你<strong>极强的灵活性和适应力</strong>。你能在不同场景中切换模式，像变色龙一样融入各种环境。</p><p>💡 整合型的你最怕"被定义"——因为你本身就是多元的。你可以同时理解不同立场的人，在不同领域都有涉猎。这种"通才"特质在需要跨界整合的工作中极具价值。</p>';
+                learning = '<p>📖 <strong>多样化输入</strong>最适合你。不要局限于一种学习方式——看书、看视频、动手做、讨论、教学他人，轮着来。<strong>跨学科学习</strong>：把不同领域的知识连接起来，你会产生独特的洞见。<strong>项目制</strong>：做一个需要多种技能的完整项目，比单一技能训练更有趣。</p>';
+                career = '<p>🎯 <strong>推荐方向：</strong>产品经理、咨询顾问、自媒体创作者、活动策划、创业者的联合创始人</p><p>这些角色需要整合多方资源、应对多变场景，正是你的舞台。</p>';
+                advice = '<p>💬 <strong>给家长的建议：</strong>整合型的孩子可能看起来"三分钟热度"。这不一定是坏事——他/她是在探索自己的可能性。<strong>支持探索但引导深入</strong>：允许尝试多种兴趣，但当找到真正喜欢的时，鼓励他/她坚持下去。</p>';
+            } else if (types.mainType.includes('认知型')) {
+                talents = '好奇心强 · 主见权威 · 探索欲旺 · 自我驱动';
+                advantage = '<p>🌟 你是个小哲学家！斗形纹居多意味着你有<strong>强烈的好奇心和主见</strong>。"为什么"是你的口头禅，你不满足于表面答案，总想探究事物的本质。</p><p>💡 认知型的你喜欢思考和辩论。在讨论中，你不是为了赢，而是为了接近真理。你有自己的判断标准，不会轻易被说服——但如果你被说服了，那一定是因为对方真的有道理。</p>';
+                learning = '<p>📖 <strong>探究式学习</strong>最适合你。与其告诉你答案，不如引导你自己发现答案。<strong>深度阅读</strong>：你适合读有深度的书和文章，而不是碎片化信息。<strong>辩论和讨论</strong>：通过思想碰撞来深化理解。</p><p>⚠️ 注意：你可能有点"固执"。记住：承认错误不是软弱，而是更强大的表现。</p>';
+                career = '<p>🎯 <strong>推荐方向：</strong>研究员、工程师、教授/学者、分析师、科学记者、战略顾问</p><p>这些角色需要深度思考和持续探索，与你的天赋完美匹配。</p>';
+                advice = '<p>💬 <strong>给家长的建议：</strong>认知型的孩子需要<strong>被认真对待</strong>。当他/她问"为什么"时，不要敷衍——即使你不知道答案，也可以一起查找。<strong>尊重他/她的观点</strong>，即使与你不同。辩论是好事，说明孩子在思考。</p>';
+            } else if (types.mainType.includes('模仿型')) {
+                talents = '善于模仿 · 适应力强 · 团队配合 · 观察入微';
+                advantage = '<p>🌟 你是最好的队友！正箕纹居多意味着你有<strong>出色的模仿能力和团队适应性</strong>。你能快速学习和复制优秀的方法，也能敏锐感知团队的节奏和氛围。</p><p>💡 模仿型的你不是"没有创造力"——你的创造力体现在"改进"上。你能在吸收别人的优点后，加入自己的优化，做出更好的版本。这种能力在执行和运营工作中极为重要。</p>';
+                learning = '<p>📖 <strong>示范+练习</strong>最适合你。先看完整的示范（视频、演示），然后自己跟着做。<strong>找好榜样</strong>：身边有一个优秀的人参考，你的进步速度会惊人。<strong>反馈循环</strong>：做完后得到具体反馈，然后迭代改进。</p>';
+                career = '<p>🎯 <strong>推荐方向：</strong>运营经理、客户经理、培训师、秘书/助理、医疗技师、客服主管</p><p>这些角色需要快速学习能力、执行力和服务意识，与你的天赋完美匹配。</p>';
+                advice = '<p>💬 <strong>给家长的建议：</strong>模仿型的孩子高度依赖环境。<strong>近朱者赤</strong>——确保他/她身边的人是积极的榜样。表扬具体的行为（"你刚才整理书包的方式很好"），而不是笼统的夸奖。给孩子明确的流程和步骤，他/她会照做得很好。</p>';
+            } else {
+                talents = '多元特质 · 综合发展 · 灵活应变 · 平衡发展';
+                advantage = '<p>🌟 你是独一无二的组合！你的指纹纹型分布非常均衡，这意味着你拥有<strong>多元化的天赋组合</strong>。你不是单一类型的"典型代表"，而是多种特质的融合体。</p><p>💡 这种组合意味着你有更多的可能性。你可能在不同场合展现出不同的优势——工作时雷厉风行，生活中温柔体贴。关键是要了解自己在不同情境下的模式，发挥对应的优势。</p>';
+                learning = '<p>📖 <strong>混合式学习</strong>最适合你。根据不同的内容选择不同的学习方法——理论性的用阅读和思考，实操性的用动手和练习。<strong>关注大拇指</strong>：你的两个大拇指决定了你的核心性格方向，以此为基础选择主要的学习方式。</p>';
+                career = '<p>🎯 <strong>推荐方向：</strong>你的组合型特质适合需要综合能力的角色，如项目经理、中小企业经营者、自由职业者</p><p>建议结合你的大拇指纹型和食指纹型来做更精细的职业定位。</p>';
+                advice = '<p>💬 <strong>给家长的建议：</strong>组合型的孩子需要<strong>全面的培养</strong>。不要只关注某一方面的发展，而是提供多样化的体验和机会。观察孩子在哪些方面表现出最大的热情和天赋，然后重点支持那些方向。</p>';
+            }
+
+            // Build finger detail section
+            let fingerDetail = '<div class="report-section"><h3>🖐️ 十指纹型详情</h3><div class="finger-detail-grid">';
+            FINGERS.forEach(f => {
+                const code = sel[f.id];
+                const name = PATTERN_NAMES[code] || code;
+                fingerDetail += `<div class="finger-item"><span class="finger-label">${f.name}</span><span class="finger-value">${name} (${code})</span></div>`;
+            });
+            fingerDetail += '</div></div>';
+
+            // Stats
+            const statsText = `斗形纹 ${douCount} 个 | 箕形纹 ${luCount} 个 | 双斗纹 ${wcCount} 个 | 反箕 ${hasRl ? '1' : '0'} 个 | 弧形 ${vals.filter(v=>v==='X').length} 个`;
+
+            return `
+<div class="report-section"><h3>🔑 核心天赋</h3><div class="advantage-tags">${talents.split('·').map(t => `<span class="tag tag-primary">${t.trim()}</span>`).join('')}</div></div>
+<div class="report-section"><h3>📊 纹型统计</h3><p style="color:#666;font-size:13px;">${statsText}</p></div>
+${fingerDetail}
+<div class="report-section"><h3>⭐ 性格优势</h3>${advantage}</div>
+<div class="report-section"><h3>📚 学习风格建议</h3>${learning}</div>
+<div class="report-section"><h3>🎯 发展方向</h3>${career}</div>
+<div class="report-section"><h3>💡 给家长/自己的建议</h3>${advice}</div>
+<div class="report-footer">
+<p style="text-align:center;color:#999;font-size:11px;margin-top:20px;">
+— 本报告由 AI 皮纹天赋速测生成 —<br>
+皮纹学仅供参考娱乐，不作为任何正式评估依据<br>
+生成时间：${new Date().toLocaleString('zh-CN')}
+</p></div>
+`;
         }
 
         function restart() {
