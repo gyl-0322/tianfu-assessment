@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI皮纹天赋速测 · 免费体验</title>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -343,6 +344,175 @@
         }
         img { max-width: 100%; height: auto; }
 
+        /* Share button */
+        .share-btn {
+            display: block;
+            width: calc(100% - 40px);
+            margin: 15px 20px 0;
+            padding: 14px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .share-btn:active { transform: scale(0.98); }
+
+        /* Poster modal */
+        .poster-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .poster-modal.show { display: flex; }
+        .poster-content {
+            background: white;
+            border-radius: 16px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .poster-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .poster-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #999;
+            padding: 0 5px;
+        }
+        .poster-preview {
+            padding: 20px;
+            text-align: center;
+        }
+        .poster-preview img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .poster-tip {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            padding: 10px 20px 20px;
+        }
+
+        /* Poster template (hidden, used for rendering) */
+        .poster-template {
+            position: fixed;
+            left: -9999px;
+            top: -9999px;
+            width: 375px;
+            background: white;
+        }
+        .poster-bg {
+            width: 375px;
+            min-height: 600px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 40%, #f093fb 100%);
+            padding: 30px 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .poster-top {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+        }
+        .poster-logo {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+        .poster-type {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .poster-tagline {
+            font-size: 14px;
+            opacity: 0.95;
+            line-height: 1.5;
+        }
+        .poster-middle {
+            background: rgba(255,255,255,0.95);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .poster-core-title {
+            font-size: 15px;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+        .poster-talents {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        .poster-talent-tag {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .poster-bottom {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255,255,255,0.95);
+            border-radius: 12px;
+            padding: 15px;
+        }
+        .poster-qr {
+            flex-shrink: 0;
+        }
+        .poster-qr img {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            background: white;
+            padding: 5px;
+        }
+        .poster-action {
+            flex: 1;
+        }
+        .poster-cta {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .poster-url {
+            font-size: 12px;
+            color: #667eea;
+        }
+
         /* Prevent right-side overflow globally */
         body { overflow-x: hidden; }
         * { max-width: 100%; }
@@ -440,6 +610,45 @@
             </div>
             <div id="reportContent"></div>
             <button class="restart-btn" onclick="restart()">🔄 重新测试</button>
+            <button class="share-btn" onclick="generatePoster()">📤 生成分享海报</button>
+        </div>
+    </div>
+
+    <!-- 海报弹窗 -->
+    <div class="poster-modal" id="posterModal">
+        <div class="poster-content">
+            <div class="poster-header">
+                <span>📤 长按保存海报</span>
+                <button class="poster-close" onclick="closePoster()">✕</button>
+            </div>
+            <div class="poster-preview" id="posterPreview"></div>
+            <div class="poster-tip">💡 长按图片 → 保存 → 分享朋友圈</div>
+        </div>
+    </div>
+
+    <!-- 隐藏的海报模板 -->
+    <div class="poster-template" id="posterTemplate">
+        <div class="poster-bg">
+            <div class="poster-top">
+                <div class="poster-logo">🔍 AI皮纹天赋速测</div>
+                <div class="poster-type" id="posterType"></div>
+                <div class="poster-tagline" id="posterTagline"></div>
+            </div>
+            <div class="poster-middle">
+                <div class="poster-result-box">
+                    <div class="poster-core-title">🌟 核心天赋</div>
+                    <div class="poster-talents" id="posterTalents"></div>
+                </div>
+            </div>
+            <div class="poster-bottom">
+                <div class="poster-qr">
+                    <img id="posterQR" src="" alt="二维码" />
+                </div>
+                <div class="poster-action">
+                    <div class="poster-cta">扫码测测你的天赋</div>
+                    <div class="poster-url">tianfu-assessment-26jc.vercel.app</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -815,6 +1024,64 @@ ${fingerDetail}
             document.getElementById('resultScreen').style.display = 'none';
             document.getElementById('form').style.display = 'block';
             updateProgress();
+        }
+
+        // === 海报生成功能 ===
+        async function generatePoster() {
+            const modal = document.getElementById('posterModal');
+            const template = document.getElementById('posterTemplate');
+            const preview = document.getElementById('posterPreview');
+            
+            // 获取当前结果数据
+            const type = document.getElementById('resultType').textContent;
+            const tagline = document.getElementById('resultTagline').textContent;
+            
+            // 获取核心天赋标签
+            const talentTags = document.querySelectorAll('.advantage-tags .tag');
+            let talentsHTML = '';
+            talentTags.forEach(tag => {
+                talentsHTML += `<span class="poster-talent-tag">${tag.textContent}</span>`;
+            });
+            
+            // 填充模板
+            document.getElementById('posterType').textContent = type;
+            document.getElementById('posterTagline').textContent = tagline;
+            document.getElementById('posterTalents').innerHTML = talentsHTML;
+            
+            // 生成二维码
+            const qrURL = 'https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=' + encodeURIComponent('https://tianfu-assessment-26jc.vercel.app');
+            document.getElementById('posterQR').src = qrURL;
+            
+            // 等待二维码加载
+            await new Promise(resolve => {
+                const qrImg = document.getElementById('posterQR');
+                if (qrImg.complete) resolve();
+                else qrImg.onload = resolve;
+            });
+            
+            // 显示弹窗
+            modal.classList.add('show');
+            preview.innerHTML = '<div style="padding:40px;color:#999;text-align:center;">正在生成海报...</div>';
+            
+            try {
+                const canvas = await html2canvas(template, {
+                    width: 375,
+                    height: template.querySelector('.poster-bg').scrollHeight,
+                    scale: 2,
+                    backgroundColor: null,
+                    useCORS: true
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                preview.innerHTML = `<img src="${imgData}" alt="分享海报" style="max-width:100%;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1);" />`;
+            } catch (err) {
+                console.error('海报生成失败:', err);
+                preview.innerHTML = '<div style="padding:40px;color:#e74c3c;text-align:center;">海报生成失败，请重试</div>';
+            }
+        }
+        
+        function closePoster() {
+            document.getElementById('posterModal').classList.remove('show');
         }
 
         // Init on load
