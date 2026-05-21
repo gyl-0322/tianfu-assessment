@@ -149,6 +149,11 @@
             height: 36px;
             object-fit: contain;
             display: block;
+            cursor: zoom-in;
+            transition: transform 0.2s;
+        }
+        .pattern-img:hover {
+            transform: scale(1.1);
         }
 
         /* Pattern color themes */
@@ -556,6 +561,39 @@
             letter-spacing: 0.5px;
         }
 
+        /* 指纹图片放大弹窗 */
+        .zoom-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .zoom-modal.show { display: flex; }
+        .zoom-content {
+            text-align: center;
+            max-width: 90%;
+            max-height: 90%;
+        }
+        .zoom-content img {
+            max-width: 300px;
+            max-height: 300px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            background: white;
+            padding: 15px;
+        }
+        .zoom-name {
+            color: white;
+            font-size: 18px;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+
         /* Prevent right-side overflow globally */
         body { overflow-x: hidden; }
         * { max-width: 100%; }
@@ -669,6 +707,14 @@
         </div>
     </div>
 
+    <!-- 指纹图片放大弹窗 -->
+    <div class="zoom-modal" id="zoomModal" onclick="closeZoom()">
+        <div class="zoom-content">
+            <img id="zoomImg" src="" alt="指纹放大图" />
+            <div class="zoom-name" id="zoomName"></div>
+        </div>
+    </div>
+
     <!-- 隐藏的海报模板 -->
     <div class="poster-template" id="posterTemplate">
         <div class="poster-bg">
@@ -746,7 +792,7 @@
                     btn.dataset.finger = finger.id;
                     btn.dataset.pattern = p.code;
                     btn.title = `${p.name}（${p.desc}）`;
-                    btn.innerHTML = `<img class="pattern-img" src="${FINGER_IMGS[p.code] || ''}" alt="${p.name}" /><div class="pattern-label">${p.name}</div>`;
+                    btn.innerHTML = `<img class="pattern-img" src="${FINGER_IMGS[p.code] || ''}" alt="${p.name}" onclick="showZoom('${p.code}','${p.name}')" /><div class="pattern-label">${p.name}</div>`;
                     btn.onclick = () => selectPattern(btn);
                     grid.appendChild(btn);
                 });
@@ -1125,6 +1171,18 @@ ${fingerDetail}
         
         function closePoster() {
             document.getElementById('posterModal').classList.remove('show');
+        }
+
+        // === 指纹图片放大功能 ===
+        function showZoom(code, name) {
+            const modal = document.getElementById('zoomModal');
+            document.getElementById('zoomImg').src = FINGER_IMGS[code];
+            document.getElementById('zoomName').textContent = name;
+            modal.classList.add('show');
+        }
+
+        function closeZoom() {
+            document.getElementById('zoomModal').classList.remove('show');
         }
 
         // Init on load
