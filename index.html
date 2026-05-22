@@ -752,16 +752,12 @@
             'Wt': 'patterns/Wt.jpg',
             'We': 'patterns/We.jpg',
             'Wc': 'patterns/Wc.jpg',
-            'Wd': 'patterns/Wd.jpg',
             'Lu': 'patterns/Lu.jpg',
             'Rl': 'patterns/Rl.jpg',
-            'X': 'patterns/X.jpg',
             'Xn': 'patterns/Xn.jpg',
-            'Wpe': 'patterns/Wpe.jpg',
-            'Wsp': 'patterns/Wsp.jpg',
-            'Wsp-r': 'patterns/Wsp-r.jpg'
+            'Wpe': 'patterns/Wpe.jpg'
         };
-        const PATTERN_NAMES = {"Ws": "螺旋斗", "Wt": "靶心斗", "We": "伸长斗", "Wc": "双斗", "Wd": "双箕斗", "Lu": "大正箕", "Rl": "反箕", "X": "简单弧", "Xn": "帐篷弧", "Wpe": "孔雀眼", "Wsp": "侧向斗", "Wsp-r": "反侧向斗"};
+        const PATTERN_NAMES = {"Ws": "螺旋斗", "Wt": "靶心斗", "We": "伸长斗", "Wc": "双斗", "Lu": "大正箕", "Rl": "反箕", "Xn": "帐篷弧", "Wpe": "孔雀眼"};
 
 
         // Finger definitions
@@ -800,7 +796,7 @@
                     btn.dataset.finger = finger.id;
                     btn.dataset.pattern = p.code;
                     btn.title = `${p.name} — 点击放大查看`;
-                    btn.innerHTML = `<img class="pattern-img" src="${FINGER_IMGS[p.code] || ''}" alt="${p.name}" onclick="showZoom('${p.code}','${p.name}')" style="${p.code === 'Wsp' ? 'transform:scaleX(-1)' : ''}" /><div class="pattern-label">${p.name}</div>`;
+                    btn.innerHTML = `<img class="pattern-img" src="${FINGER_IMGS[p.code] || ''}" alt="${p.name}" onclick="showZoom('${p.code}','${p.name}')" style="${''}" /><div class="pattern-label">${p.name}</div>`;
                     btn.onclick = () => selectPattern(btn);
                     grid.appendChild(btn);
                 });
@@ -1186,9 +1182,9 @@ ${fingerDetail}
             const modal = document.getElementById('zoomModal');
             const img = document.getElementById('zoomImg');
             img.src = FINGER_IMGS[code];
-            img.style.transform = (code === 'Wsp') ? 'scaleX(-1)' : '';
+            img.style.transform = '';
             // 反侧向斗提示
-            if (code === 'Wsp') {
+            if (false) {
                 document.getElementById('zoomName').innerHTML = name + ' <small style="color:#999">(反侧向斗=镜像)</small>';
             } else {
                 document.getElementById('zoomName').textContent = name;
