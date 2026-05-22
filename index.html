@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI皮纹天赋速测 · 免费体验</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -147,6 +148,7 @@
         .pattern-img {
             width: 100%;
             height: 36px;
+            min-height: 36px;
             object-fit: contain;
             display: block;
             cursor: zoom-in;
@@ -329,6 +331,26 @@
             border-radius: 8px;
             font-size: 11px;
             color: #c89a00;
+            max-height: 60px;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .pattern-help.expanded {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .pattern-help::after {
+            content: '▼ 点击展开';
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            font-size: 10px;
+            color: #999;
+        }
+        .pattern-help.expanded::after {
+            content: '▲ 点击收起';
         }
 
         .pattern-help strong { display: block; margin-bottom: 3px; }
@@ -341,7 +363,7 @@
         @media (max-width: 500px) {
             .pattern-grid { grid-template-columns: repeat(4, 1fr); gap: 4px; }
             .pattern-label { font-size: 8px; }
-            .pattern-img { height: 30px; }
+            .pattern-img { height: 30px; min-height: 30px; }
             .header h1 { font-size: 18px; }
             .report-section h3 { font-size: 13px; }
             .report-section p { font-size: 13px; }
@@ -427,89 +449,97 @@
         }
 
         /* Poster template (hidden, used for rendering) */
+        /* Poster template (hidden, used for rendering) */
         .poster-template {
             position: fixed;
             left: -9999px;
             top: -9999px;
             width: 375px;
-            background: #f5f3f0;
+            background: #000428;
         }
         .poster-bg {
             width: 375px;
             min-height: 600px;
-            background: linear-gradient(135deg, #f5f3f0 0%, #ebe8e3 100%);
+            background: linear-gradient(135deg, #000428 0%, #004e92 100%);
             padding: 40px 30px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             position: relative;
             overflow: hidden;
+            color: white;
         }
-        /* 莫兰迪装饰圆形 */
+        /* 科技网格背景 */
         .poster-bg::before {
             content: '';
             position: absolute;
-            width: 180px;
-            height: 180px;
-            background: rgba(180, 155, 150, 0.25);
-            border-radius: 50%;
-            top: -40px;
-            left: -40px;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,255,224,0.03) 40px, rgba(0,255,224,0.03) 41px),
+                repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(0,255,224,0.03) 40px, rgba(0,255,224,0.03) 41px);
+            pointer-events: none;
         }
+        /* 青色光晕 */
         .poster-bg::after {
             content: '';
             position: absolute;
-            width: 140px;
-            height: 140px;
-            background: rgba(160, 175, 165, 0.2);
-            border-radius: 50%;
-            bottom: 120px;
-            right: -30px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0,255,224,0.2) 0%, transparent 70%);
+            top: -150px;
+            left: -100px;
         }
         .poster-top {
             text-align: center;
-            color: #4a4a4a;
+            color: white;
             margin-bottom: 30px;
             position: relative;
             z-index: 1;
         }
         .poster-logo {
             font-size: 12px;
-            color: #8b7e7a;
+            color: #00ffe0;
             letter-spacing: 3px;
             margin-bottom: 25px;
             text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0,255,224,0.5);
         }
         .poster-type {
             font-size: 28px;
             font-weight: 400;
             margin-bottom: 12px;
-            color: #3d3d3d;
+            color: #ffffff;
             font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", serif;
+            text-shadow: 0 0 20px rgba(0,255,224,0.4);
         }
         .poster-tagline {
             font-size: 13px;
-            color: #7a7a7a;
+            color: rgba(255,255,255,0.8);
             line-height: 1.6;
             letter-spacing: 1px;
         }
         .poster-middle {
-            background: rgba(255,255,255,0.7);
+            background: rgba(0,255,224,0.08);
             backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 25px;
             margin: 20px 0;
             position: relative;
             z-index: 1;
-            border: 1px solid rgba(200,190,185,0.3);
+            border: 1px solid rgba(0,255,224,0.3);
+            box-shadow: 0 0 20px rgba(0,255,224,0.1);
         }
         .poster-core-title {
             font-size: 11px;
-            color: #9a8a85;
+            color: #00ffe0;
             letter-spacing: 4px;
             margin-bottom: 18px;
             text-align: center;
             text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(0,255,224,0.5);
         }
         .poster-talents {
             display: flex;
@@ -518,37 +548,41 @@
             justify-content: center;
         }
         .poster-talent-tag {
-            background: rgba(180, 155, 150, 0.15);
-            color: #5a4a45;
+            background: rgba(0,255,224,0.15);
+            color: #00ffe0;
             padding: 8px 16px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 400;
             letter-spacing: 1px;
-            border: 1px solid rgba(180, 155, 150, 0.3);
+            border: 1px solid rgba(0,255,224,0.5);
+            box-shadow: 0 0 10px rgba(0,255,224,0.2);
         }
         .poster-bottom {
             display: flex;
             align-items: center;
             gap: 15px;
-            background: rgba(255,255,255,0.7);
+            background: rgba(0,255,224,0.08);
             backdrop-filter: blur(10px);
             border-radius: 16px;
             padding: 18px;
             position: relative;
             z-index: 1;
-            border: 1px solid rgba(200,190,185,0.3);
+            border: 1px solid rgba(0,255,224,0.3);
+            box-shadow: 0 0 15px rgba(0,255,224,0.1);
         }
         .poster-qr {
             flex-shrink: 0;
+            box-shadow: 0 0 15px rgba(0,255,224,0.3);
+            border-radius: 10px;
+            padding: 3px;
+            background: white;
         }
         .poster-qr img {
             width: 70px;
             height: 70px;
             border-radius: 10px;
             background: white;
-            padding: 4px;
-            border: 1px solid rgba(200,190,185,0.4);
         }
         .poster-action {
             flex: 1;
@@ -556,14 +590,15 @@
         .poster-cta {
             font-size: 13px;
             font-weight: 400;
-            color: #5a4a45;
             margin-bottom: 4px;
             letter-spacing: 1px;
+            color: rgba(255,255,255,0.95);
+            text-shadow: 0 0 10px rgba(0,255,224,0.3);
         }
         .poster-url {
             font-size: 10px;
-            color: #9a8a85;
             letter-spacing: 0.5px;
+            color: rgba(0,255,224,0.7);
         }
 
         /* 指纹图片放大弹窗 */
@@ -616,10 +651,26 @@
             请为每个手指选择一个纹型（可参考纹型说明），完成后点击生成报告
         </div>
 
-        <div class="pattern-help">
-            <strong>📖 纹型速查说明：</strong>
-            🌀斗形纹 → 同心圆/螺旋状 &nbsp;|&nbsp; 📐箕形纹 → 开口弧线流至一侧<br>
-            🌉弧形纹 → 无三叉点/起伏小 &nbsp;|&nbsp; ⚠️ 不确定请填"斗形"
+        <div class="pattern-help" onclick="this.classList.toggle('expanded')">
+            <strong>📖 纹型速查说明（点击展开）：</strong>
+            <div style="margin-top:8px;">
+            <strong>🔵 斗形纹（5种）</strong><br>
+            • <strong>螺旋斗(Ws)</strong>：同心圆或螺旋状纹路，中心像漩涡<br>
+            • <strong>靶心斗(Wt)</strong>：类似同心圆靶心，内外圈清晰<br>
+            • <strong>伸长斗(We)</strong>：纵向拉长的斗形纹，像椭圆形<br>
+            • <strong>双斗(Wc/Wd)</strong>：两个斗形纹连在一起，Wc是上下，Wd是左右<br>
+            • <strong>孔雀眼(Wpe)</strong>：像孔雀羽毛眼睛的特殊斗形纹<br>
+            • <strong>侧向斗(Wsp/Wsp-r)</strong>：偏向一侧的斗形纹，Wsp-r是反手<br>
+            <br>
+            <strong>🟢 箕形纹（2种）</strong><br>
+            • <strong>大正箕(Lu)</strong>：开口朝向小指方向（多数人）<br>
+            • <strong>反箕(Rl)</strong>：开口朝向拇指方向（少数人）<br>
+            <br>
+            <strong>🟡 弧形纹（2种）</strong><br>
+            • <strong>简单弧(X)</strong>：像小山丘的平缓隆起，无三叉点<br>
+            • <strong>帐篷弧(Xn)</strong>：像帐篷尖顶的锐角隆起<br>
+            <br>
+            <strong>⚠️ 不确定？</strong> 选择最接近的，或统一填"斗形"
         </div>
 
         <div class="count-display" id="countDisplay">已选择 <strong>0</strong>/10 个手指</div>
@@ -1146,16 +1197,35 @@ ${fingerDetail}
             document.getElementById('posterTagline').textContent = tagline;
             document.getElementById('posterTalents').innerHTML = talentsHTML;
             
-            // 生成二维码
-            const qrURL = 'https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=' + encodeURIComponent('https://tianfu-assessment-26jc.vercel.app');
-            document.getElementById('posterQR').src = qrURL;
+            // 生成二维码（客户端生成，避免外部API被墙）
+            const qrContainer = document.createElement('div');
+            qrContainer.style.position = 'absolute';
+            qrContainer.style.left = '-9999px';
+            document.body.appendChild(qrContainer);
             
-            // 等待二维码加载
-            await new Promise(resolve => {
-                const qrImg = document.getElementById('posterQR');
-                if (qrImg.complete) resolve();
-                else qrImg.onload = resolve;
+            new QRCode(qrContainer, {
+                text: 'https://tianfu-assessment-26jc.vercel.app',
+                width: 80,
+                height: 80,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.H
             });
+            
+            // 等待QR码渲染
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // 提取图片（优先用canvas，否则用html2canvas转换table）
+            const canvas = qrContainer.querySelector('canvas');
+            if (canvas) {
+                document.getElementById('posterQR').src = canvas.toDataURL();
+            } else {
+                const table = qrContainer.querySelector('table');
+                const tempCanvas = await html2canvas(table, { scale: 2, backgroundColor: '#ffffff' });
+                document.getElementById('posterQR').src = tempCanvas.toDataURL();
+            }
+            
+            document.body.removeChild(qrContainer);
             
             // 显示弹窗
             modal.classList.add('show');
