@@ -698,7 +698,7 @@
                         <div class="finger-name">无名指</div>
                         <div class="pattern-grid" id="grid-right-ring"></div>
                     </div>
-                    <div class="finger-card" style="grid-column:1/-1;max-width:180px;margin:0 auto">
+                    <div class="finger-card">
                         <div class="finger-name">小指</div>
                         <div class="pattern-grid" id="grid-right-pinky"></div>
                     </div>
@@ -725,7 +725,7 @@
                         <div class="finger-name">无名指</div>
                         <div class="pattern-grid" id="grid-left-ring"></div>
                     </div>
-                    <div class="finger-card" style="grid-column:1/-1;max-width:180px;margin:0 auto">
+                    <div class="finger-card">
                         <div class="finger-name">小指</div>
                         <div class="pattern-grid" id="grid-left-pinky"></div>
                     </div>
@@ -793,6 +793,7 @@
                 <div class="poster-action">
                     <div class="poster-cta">扫码测测你的天赋</div>
                     <div class="poster-url">tianfu-assessment-26jc.vercel.app</div>
+                    <div style="font-size:9px;margin-top:3px;color:rgba(0,255,224,0.5);">📋 打不开？长按复制网址到浏览器</div>
                 </div>
             </div>
         </div>
@@ -1204,14 +1205,24 @@ ${fingerDetail}
             qrContainer.style.left = '-9999px';
             document.body.appendChild(qrContainer);
             
-            new QRCode(qrContainer, {
-                text: 'https://tianfu-assessment-26jc.vercel.app',
-                width: 80,
-                height: 80,
-                colorDark: '#000000',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.H
-            });
+            // 使用 qrcodejs 生成二维码（兼容国内网络）
+            try {
+                new QRCode(qrContainer, {
+                    text: 'https://tianfu-assessment-26jc.vercel.app',
+                    width: 80,
+                    height: 80,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+            } catch(e) {
+                console.warn('QR码生成失败:', e);
+                // 使用备用方式：显示URL文字
+                const urlSpan = document.createElement('span');
+                urlSpan.style.cssText = 'font-size:10px;color:#00ffe0;display:block;margin-top:5px;text-align:center;word-break:break-all;';
+                urlSpan.textContent = 'tianfu-assessment-26jc.vercel.app';
+                qrContainer.appendChild(urlSpan);
+            }
             
             // 等待QR码渲染
             await new Promise(resolve => setTimeout(resolve, 500));
