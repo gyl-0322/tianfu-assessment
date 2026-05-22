@@ -168,7 +168,8 @@
         .pattern-btn[data-pattern="Xn"]  { --accent: #e74c3c; }
         .pattern-btn[data-pattern="Wpe"] { --accent: #9b59b6; }
         .pattern-btn[data-pattern="Wsp"] { --accent: #f39c12; }
-        .pattern-btn[data-pattern="Wsp-r"] { --accent: #f39c12; transform: scaleX(-1); }
+        .pattern-btn[data-pattern="Wsp-r"] { --accent: #f39c12; }
+        .pattern-btn[data-pattern="Wsp-r"] .pattern-img { transform: scaleX(-1); }
 
         .pattern-btn.selected {
             border-color: var(--accent);
@@ -1188,11 +1189,7 @@ ${fingerDetail}
             img.src = FINGER_IMGS[code];
             img.style.transform = '';
             // 反侧向斗现在有独立图片，不需要翻转提示
-            if (code === 'Wsp-r') {
-                document.getElementById('zoomName').innerHTML = name + ' <small style="color:#999">(反侧向斗=镜像)</small>';
-            } else {
-                document.getElementById('zoomName').textContent = name;
-            }
+            document.getElementById('zoomName').textContent = name;
             modal.classList.add('show');
         }
 
