@@ -759,7 +759,7 @@
             'Xn': 'patterns/Xn.jpg',
             'Wpe': 'patterns/Wpe.jpg',
             'Wsp': 'patterns/Wsp.jpg',
-            'Wsp-r': 'patterns/Wsp.jpg'
+            'Wsp-r': 'patterns/Wsp-r.jpg'
         };
         const PATTERN_NAMES = {"Ws": "螺旋斗", "Wt": "靶心斗", "We": "伸长斗", "Wc": "双斗", "Wd": "双箕斗", "Lu": "大正箕", "Rl": "反箕", "X": "简单弧", "Xn": "帐篷弧", "Wpe": "孔雀眼", "Wsp": "侧向斗", "Wsp-r": "反侧向斗"};
 
@@ -1186,8 +1186,8 @@ ${fingerDetail}
             const modal = document.getElementById('zoomModal');
             const img = document.getElementById('zoomImg');
             img.src = FINGER_IMGS[code];
-            img.style.transform = (code === 'Wsp-r') ? 'scaleX(-1)' : '';
-            // 反侧向斗提示
+            img.style.transform = '';
+            // 反侧向斗现在有独立图片，不需要翻转提示
             if (code === 'Wsp-r') {
                 document.getElementById('zoomName').innerHTML = name + ' <small style="color:#999">(反侧向斗=镜像)</small>';
             } else {
