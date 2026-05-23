@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI皮纹天赋速测 · 免费体验</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <!-- QR Code: 使用服务端生成或文字URL -->
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1009,15 +1009,21 @@ ${typeInfo}`;
 
                     document.getElementById('reportContent').innerHTML = data.report;
                 } else {
-                    alert('❌ 生成失败：' + (data.error || '请重试'));
-                    document.getElementById('loadingScreen').style.display = 'none';
-                    document.getElementById('form').style.display = 'block';
+                    // API返回但失败：静默回退到本地报告
+                    console.warn('AI生成失败，使用本地报告:', data.error);
                 }
             } catch (error) {
-                alert('❌ 网络错误，请检查网络后重试');
-                document.getElementById('loadingScreen').style.display = 'none';
-                document.getElementById('form').style.display = 'block';
+                // 网络错误：静默回退到本地报告
+                console.warn('网络错误，使用本地报告:', error.message);
             }
+            
+            // === 本地生成报告（默认方案，无需联网）===
+            const localReport = generateLocalReport(selections, types, summary);
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'block';
+            document.getElementById('resultType').textContent = types.mainType;
+            document.getElementById('resultTagline').textContent = types.tagline;
+            document.getElementById('reportContent').innerHTML = localReport;
         }
 
         function analyzeType(sel) {
@@ -1199,45 +1205,54 @@ ${fingerDetail}
             document.getElementById('posterTagline').textContent = tagline;
             document.getElementById('posterTalents').innerHTML = talentsHTML;
             
-            // 生成二维码（客户端生成，避免外部API被墙）
-            const qrContainer = document.createElement('div');
-            qrContainer.style.position = 'absolute';
-            qrContainer.style.left = '-9999px';
-            document.body.appendChild(qrContainer);
+            // 生成二维码（多方案兼容）
+            let qrDataUrl = '';
             
-            // 使用 qrcodejs 生成二维码（兼容国内网络）
+            // 方案1：尝试用 api.qrserver.com（国外用户）
             try {
-                new QRCode(qrContainer, {
-                    text: 'https://tianfu-assessment-26jc.vercel.app',
-                    width: 80,
-                    height: 80,
-                    colorDark: '#000000',
-                    colorLight: '#ffffff',
-                    correctLevel: QRCode.CorrectLevel.H
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent('https://tianfu-assessment-26jc.vercel.app')}`;
+                const qrImg = new Image();
+                qrImg.crossOrigin = 'anonymous';
+                await new Promise((resolve, reject) => {
+                    qrImg.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 80;
+                        canvas.height = 80;
+                        canvas.getContext('2d').drawImage(qrImg, 0, 0);
+                        qrDataUrl = canvas.toDataURL();
+                        resolve();
+                    };
+                    qrImg.onerror = () => reject(new Error('QR API failed'));
+                    qrImg.src = qrUrl;
                 });
             } catch(e) {
-                console.warn('QR码生成失败:', e);
-                // 使用备用方式：显示URL文字
-                const urlSpan = document.createElement('span');
-                urlSpan.style.cssText = 'font-size:10px;color:#00ffe0;display:block;margin-top:5px;text-align:center;word-break:break-all;';
-                urlSpan.textContent = 'tianfu-assessment-26jc.vercel.app';
-                qrContainer.appendChild(urlSpan);
+                console.warn('外部QR API失败，使用文字QR:', e);
             }
             
-            // 等待QR码渲染
-            await new Promise(resolve => setTimeout(resolve, 500));
-            
-            // 提取图片（优先用canvas，否则用html2canvas转换table）
-            const canvas = qrContainer.querySelector('canvas');
-            if (canvas) {
-                document.getElementById('posterQR').src = canvas.toDataURL();
-            } else {
-                const table = qrContainer.querySelector('table');
-                const tempCanvas = await html2canvas(table, { scale: 2, backgroundColor: '#ffffff' });
-                document.getElementById('posterQR').src = tempCanvas.toDataURL();
+            // 方案2：失败则生成"文字二维码"（样式化）
+            if (!qrDataUrl) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 80;
+                canvas.height = 80;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, 80, 80);
+                ctx.strokeStyle = '#00ffe0';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(4, 4, 72, 72);
+                ctx.fillStyle = '#00ffe0';
+                ctx.font = '9px "PingFang SC", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('扫码访问', 40, 30);
+                ctx.fillText('或复制网址', 40, 45);
+                ctx.font = '7px monospace';
+                ctx.fillText('tianfu-assessment', 40, 62);
+                ctx.fillText('-26jc.vercel.app', 40, 73);
+                qrDataUrl = canvas.toDataURL();
             }
             
-            document.body.removeChild(qrContainer);
+            // 设置到海报
+            document.getElementById('posterQR').src = qrDataUrl;
             
             // 显示弹窗
             modal.classList.add('show');
