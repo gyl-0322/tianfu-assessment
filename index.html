@@ -363,6 +363,44 @@
             display: inline-block;
         }
 
+        .wechat-id-label {
+            color: #999;
+        }
+        .wechat-id-value {
+            color: #333;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 0 4px;
+        }
+        .wechat-copy-btn {
+            background: #667eea;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 3px 12px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .wechat-copy-btn:active {
+            background: #764ba2;
+        }
+
+        .wechat-deep-link {
+            display: block;
+            width: fit-content;
+            margin: 12px auto 0;
+            padding: 10px 24px;
+            background: #07c160;
+            color: #fff;
+            border-radius: 25px;
+            font-size: 14px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .wechat-deep-link:active {
+            background: #06ad56;
+        }
+
         .lead-cta {
             display: block;
             width: 100%;
@@ -972,10 +1010,21 @@
                 </p>
                 <p class="lead-limit">📌 每天限前50名，送完为止</p>
                 
+                <div class="lead-wechat-id">
+                    <span class="wechat-id-label">微信号：</span>
+                    <span class="wechat-id-value" id="wechatIdText">aipiwen01</span>
+                    <button class="wechat-copy-btn" onclick="copyWechatId()">复制</button>
+                </div>
+                
                 <div class="lead-qr">
                     <img src="images/wecom-qr.jpg" alt="添加老师微信">
-                    <p class="lead-qr-tip">👆 长按识别二维码</p>
+                    <p class="lead-qr-tip">📱 长按识别二维码，直接添加</p>
                 </div>
+                
+                <!-- 微信内直接打开按钮 -->
+                <a class="wechat-deep-link" id="wechatDeepLink" href="javascript:void(0)" onclick="openWechat()">
+                    💬 在微信中打开，一键添加
+                </a>
                 
                 <p style="font-size:12px;color:#888;margin-top:10px;">
                     备注"<strong>天赋</strong>"更快通过
@@ -1079,6 +1128,11 @@
             'Wsp-r': 'patterns/Wsp-r.jpg'
         };
         const PATTERN_NAMES = {"Ws": "螺旋斗", "Wt": "靶心斗", "We": "伸长斗", "Wc": "双斗", "Wd": "双箕斗", "Lu": "大正箕", "Rl": "反箕", "X": "简单弧", "Xn": "帐篷弧", "Wpe": "孔雀眼", "Wsp": "侧向斗", "Wsp-r": "反侧向斗"};
+        
+        // 微信短链（用于海报二维码，扫码后直接在微信中添加好友）
+        // 获取方式：微信 → 我 → 点二维码 → 右上角… → 复制链接
+        // 格式：https://u.wechat.com/xxxxxx
+        const WECHAT_SHORT_LINK = '';
 
 
         // Finger definitions
@@ -1472,9 +1526,14 @@ ${fingerDetail}
             // 生成二维码（多方案兼容）
             let qrDataUrl = '';
             
+            // 二维码指向：优先用微信短链，否则指向网站
+            const qrLink = (typeof WECHAT_SHORT_LINK !== 'undefined' && WECHAT_SHORT_LINK)
+                ? WECHAT_SHORT_LINK
+                : 'https://www.aipiwen.cn';
+            
             // 方案1：尝试用 api.qrserver.com（国外用户）
             try {
-                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent('https://www.aipiwen.cn')}`;
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(qrLink)}`;
                 const qrImg = new Image();
                 qrImg.crossOrigin = 'anonymous';
                 await new Promise((resolve, reject) => {
@@ -1507,8 +1566,8 @@ ${fingerDetail}
                 ctx.fillStyle = '#00ffe0';
                 ctx.font = '9px "PingFang SC", monospace';
                 ctx.textAlign = 'center';
-                ctx.fillText('扫码访问', 40, 30);
-                ctx.fillText('或复制网址', 40, 45);
+                ctx.fillText('扫码加微信', 40, 30);
+                ctx.fillText('或访问官网', 40, 45);
                 ctx.font = '7px monospace';
                 ctx.fillText('www.aipiwen.cn', 40, 68);
                 qrDataUrl = canvas.toDataURL();
@@ -1561,6 +1620,42 @@ ${fingerDetail}
                 });
             } else {
                 prompt('请手动复制微信号：', wechatId);
+            }
+        }
+
+        // 复制微信号（引流区）
+        function copyWechatId() {
+            const wechatId = document.getElementById('wechatIdText').textContent;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(wechatId).then(() => {
+                    const btn = document.querySelector('.wechat-copy-btn');
+                    btn.textContent = '✅ 已复制';
+                    setTimeout(() => { btn.textContent = '复制'; }, 2000);
+                }).catch(() => {
+                    prompt('请手动复制微信号：', wechatId);
+                });
+            } else {
+                prompt('请手动复制微信号：', wechatId);
+            }
+        }
+
+        // 在微信中打开（深度链接）
+        function openWechat() {
+            // 微信深度链接：直接跳转到微信添加好友页
+            const deepLink = 'weixin://dl/addcontact?username=aipiwen01';
+            const fallbackUrl = 'https://www.aipiwen.cn';
+            
+            // 尝试用微信短链（需用户配置）
+            const wechatShortLink = typeof WECHAT_SHORT_LINK !== 'undefined' ? WECHAT_SHORT_LINK : '';
+            
+            if (wechatShortLink) {
+                window.location.href = wechatShortLink;
+            } else {
+                // 尝试深度链接，失败则提示手动添加
+                window.location.href = deepLink;
+                setTimeout(() => {
+                    alert('如未跳转，请手动添加微信号：aipiwen01');
+                }, 1500);
             }
         }
 
