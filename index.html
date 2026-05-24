@@ -449,7 +449,6 @@
         }
 
         /* Poster template (hidden, used for rendering) */
-        /* Poster template (hidden, used for rendering) */
         .poster-template {
             position: fixed;
             left: -9999px;
@@ -781,10 +780,8 @@
                 <div class="poster-tagline" id="posterTagline"></div>
             </div>
             <div class="poster-middle">
-                <div class="poster-result-box">
-                    <div class="poster-core-title">核心天赋</div>
-                    <div class="poster-talents" id="posterTalents"></div>
-                </div>
+                <div class="poster-core-title">核心天赋</div>
+                <div class="poster-talents" id="posterTalents"></div>
             </div>
             <div class="poster-bottom">
                 <div class="poster-qr">
@@ -792,7 +789,7 @@
                 </div>
                 <div class="poster-action">
                     <div class="poster-cta">扫码测测你的天赋</div>
-                    <div class="poster-url">tianfu-assessment-26jc.vercel.app</div>
+                    <div class="poster-url">www.aipiwen.cn</div>
                     <div style="font-size:9px;margin-top:3px;color:rgba(0,255,224,0.5);">📋 打不开？长按复制网址到浏览器</div>
                 </div>
             </div>
@@ -800,7 +797,7 @@
     </div>
 
     <script>
-        // 8 fingerprint patterns with SVG icons
+        // 12 fingerprint patterns with image files
         const FINGER_IMGS = {
             'Ws': 'patterns/Ws.jpg',
             'Wt': 'patterns/Wt.jpg',
@@ -961,85 +958,22 @@ ${summary}
             document.getElementById('resultType').textContent = types.mainType;
             document.getElementById('resultTagline').textContent = types.tagline;
             document.getElementById('reportContent').innerHTML = localReport;
-
-            // === API MODE (kept for future use) ===
-            const prompt = `【角色】你是皮纹天赋解读专家，10年实战经验，解读过3000+案例。
-
-【用户输入】10个手指纹型选择：
-${summary}
-
-【纹型代码含义】
-- Ws=螺旋斗（同心圆向外旋出）、Wt=靶心斗（有独立完整圆圈）、We=伸长斗（长度超宽度2倍）
-- Wc=双斗（两个斗纹互相环绕）、Wd=双箕斗（两个箕纹环绕）
-- Lu=正箕纹（水流从小指侧进）、Rl=反箕纹（水流从拇指侧进，逆思型标志）
-- X=弧形纹（无三叉点）、Xn=帐篷弧
-
-【性格类型判定规则】
-${typeInfo}
-
-【输出要求】
-生成一份约600字的个性化天赋报告，包含：
-1. 🔑 核心天赋（3-4个关键词）
-2. ⭐ 性格优势（150字，温暖鼓励风格）
-3. 📚 学习风格（150字，给具体可操作建议）
-4. 🎯 发展方向（100字，列出2-3个适合职业/角色）
-5. 💡 给家长的建议（100字，适合家庭教育）
-
-【语气】温暖、专业、鼓励性，避免"一定/必须"等绝对词。用emoji让报告生动。
-
-${typeInfo}`;
-
-            try {
-                const response = await fetch('/api/generate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt, selections: Object.values(selections).join(''), typeInfo })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    document.getElementById('loadingScreen').style.display = 'none';
-                    document.getElementById('resultScreen').style.display = 'block';
-
-                    // Set type display
-                    const types = analyzeTypeDisplay(selections);
-                    document.getElementById('resultType').textContent = types.mainType;
-                    document.getElementById('resultTagline').textContent = types.tagline;
-
-                    document.getElementById('reportContent').innerHTML = data.report;
-                } else {
-                    // API返回但失败：静默回退到本地报告
-                    console.warn('AI生成失败，使用本地报告:', data.error);
-                }
-            } catch (error) {
-                // 网络错误：静默回退到本地报告
-                console.warn('网络错误，使用本地报告:', error.message);
-            }
-            
-            // === 本地生成报告（默认方案，无需联网）===
-            const localReport = generateLocalReport(selections, types, summary);
-            document.getElementById('loadingScreen').style.display = 'none';
-            document.getElementById('resultScreen').style.display = 'block';
-            document.getElementById('resultType').textContent = types.mainType;
-            document.getElementById('resultTagline').textContent = types.tagline;
-            document.getElementById('reportContent').innerHTML = localReport;
         }
 
         function analyzeType(sel) {
             const vals = Object.values(sel);
             const thumbs = [sel['right-thumb'], sel['left-thumb']];
-            const isAllDou = vals.every(v => ['Ws','Wt','We','Wc','Wd'].includes(v));
-            const isAllJi = vals.every(v => ['Lu','Rl'].includes(v) || v === 'X');
+            const isAllDou = vals.every(v => ['Ws','Wt','We','Wc','Wd','Wpe','Wsp','Wsp-r'].includes(v));
+            const isAllJi = vals.every(v => ['Lu','Rl'].includes(v) || v === 'X' || v === 'Xn');
             const hasRl = vals.includes('Rl');
             const hasArc = vals.some(v => v === 'X' || v === 'Xn');
-            const douCount = vals.filter(v => ['Ws','Wt','We'].includes(v)).length;
+            const douCount = vals.filter(v => ['Ws','Wt','We','Wpe','Wsp','Wsp-r'].includes(v)).length;
             const wcCount = vals.filter(v => ['Wc','Wd'].includes(v)).length;
             const luCount = vals.filter(v => ['Lu','Wd'].includes(v)).length;
 
             if (hasRl) return `判定为【逆思型R】，因为至少有1个反箕纹。反箕纹在任何手指出现都是逆思型，优先级最高。逆思型：反向思考，创意丰富，擅长找漏洞和另类解决方案。`;
             if (isAllDou) {
-                if (thumbs.every(t => ['Ws','Wt','We'].includes(t))) {
+                if (thumbs.every(t => ['Ws','Wt','We','Wpe','Wsp','Wsp-r'].includes(t))) {
                     return `判定为【超级认知型W】，因为10个手指全是斗形纹。超级认知型：唯我独尊，主见极强，择善固执，吃软不吃硬，适合做领导者或专家。`;
                 }
             }
@@ -1054,7 +988,7 @@ ${typeInfo}`;
             if (wcCount >= 2 && douCount >= 2) {
                 return `判定为【整合型WC】，因为双斗/双箕数量较多（${wcCount}个）。整合型：灵活善变，擅长资源整合，适应环境能力强，像变色龙。`;
             }
-            if (douCount >= 4 && thumbs.some(t => ['Ws','Wt','We'].includes(t))) {
+            if (douCount >= 4 && thumbs.some(t => ['Ws','Wt','We','Wpe','Wsp','Wsp-r'].includes(t))) {
                 return `判定为【认知型W】，因为斗形纹较多（${douCount}个）且大拇指为斗形。认知型：主见权威，好奇心强，喜欢问为什么，以自我为中心。`;
             }
             if (luCount >= 4 && thumbs.some(t => ['Lu'].includes(t))) {
@@ -1068,18 +1002,18 @@ ${typeInfo}`;
             const thumbs = [sel['right-thumb'], sel['left-thumb']];
             const hasRl = vals.includes('Rl');
             const arcCount = vals.filter(v => v === 'X' || v === 'Xn').length;
-            const douCount = vals.filter(v => ['Ws','Wt','We'].includes(v)).length;
+            const douCount = vals.filter(v => ['Ws','Wt','We','Wpe','Wsp','Wsp-r'].includes(v)).length;
             const wcCount = vals.filter(v => ['Wc','Wd'].includes(v)).length;
             const luCount = vals.filter(v => ['Lu'].includes(v)).length;
 
             if (hasRl) return { mainType: '🔄 逆思型 R', tagline: '逆向思考 · 创意非凡 · 与众不同' };
-            if (vals.every(v => ['Ws','Wt','We','Wc','Wd'].includes(v)) && thumbs.every(t => ['Ws','Wt','We'].includes(t))) return { mainType: '👑 超级认知型 W', tagline: '唯我独尊 · 领袖风范 · 王者之气' };
+            if (vals.every(v => ['Ws','Wt','We','Wc','Wd','Wpe','Wsp','Wsp-r'].includes(v)) && thumbs.every(t => ['Ws','Wt','We','Wpe','Wsp','Wsp-r'].includes(t))) return { mainType: '👑 超级认知型 W', tagline: '唯我独尊 · 领袖风范 · 王者之气' };
             // Open type: thumb is arc OR 6+ arcs (check before super-mimic)
             if (thumbs.some(t => t === 'X' || t === 'Xn') || arcCount >= 6) return { mainType: '🌊 开放型 X', tagline: '海绵学习 · 踏实肯干 · 简单极致' };
             // Super mimic: all non-dou, no arcs in thumbs, mostly Lu
             if (vals.every(v => v === 'Lu') && thumbs.every(t => t === 'Lu')) return { mainType: '💝 超级模仿型 L', tagline: '敞开接纳 · 大公无私 · 奉献型' };
             if (wcCount >= 2 && douCount >= 2) return { mainType: '🎭 整合型 WC', tagline: '灵活善变 · 价值思维 · 多面高手' };
-            if (douCount >= 4 && thumbs.some(t => ['Ws','Wt','We'].includes(t))) return { mainType: '🧠 认知型 W', tagline: '主见权威 · 好奇心强 · 探索型' };
+            if (douCount >= 4 && thumbs.some(t => ['Ws','Wt','We','Wpe','Wsp','Wsp-r'].includes(t))) return { mainType: '🧠 认知型 W', tagline: '主见权威 · 好奇心强 · 探索型' };
             if (luCount >= 6 && thumbs.some(t => t === 'Lu')) return { mainType: '🤝 模仿型 L', tagline: '善于模仿 · 适应力强 · 服务型' };
             return { mainType: '🎯 组合型', tagline: '多元特质 · 灵活应变 · 综合型' };
         }
@@ -1089,7 +1023,7 @@ ${typeInfo}`;
             const vals = Object.values(sel);
             const thumbs = [sel['right-thumb'], sel['left-thumb']];
             const hasRl = vals.includes('Rl');
-            const douCount = vals.filter(v => ['Ws','Wt','We'].includes(v)).length;
+            const douCount = vals.filter(v => ['Ws','Wt','We','Wpe','Wsp','Wsp-r'].includes(v)).length;
             const luCount = vals.filter(v => ['Lu'].includes(v)).length;
             const wcCount = vals.filter(v => ['Wc','Wd'].includes(v)).length;
             
@@ -1210,7 +1144,7 @@ ${fingerDetail}
             
             // 方案1：尝试用 api.qrserver.com（国外用户）
             try {
-                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent('https://tianfu-assessment-26jc.vercel.app')}`;
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent('https://www.aipiwen.cn')}`;
                 const qrImg = new Image();
                 qrImg.crossOrigin = 'anonymous';
                 await new Promise((resolve, reject) => {
@@ -1246,8 +1180,7 @@ ${fingerDetail}
                 ctx.fillText('扫码访问', 40, 30);
                 ctx.fillText('或复制网址', 40, 45);
                 ctx.font = '7px monospace';
-                ctx.fillText('tianfu-assessment', 40, 62);
-                ctx.fillText('-26jc.vercel.app', 40, 73);
+                ctx.fillText('www.aipiwen.cn', 40, 68);
                 qrDataUrl = canvas.toDataURL();
             }
             
