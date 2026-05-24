@@ -961,60 +961,124 @@ ${summary}
         }
 
         function analyzeType(sel) {
+            const rt = sel['right-thumb'], lt = sel['left-thumb'];
             const vals = Object.values(sel);
-            const thumbs = [sel['right-thumb'], sel['left-thumb']];
-            const isAllDou = vals.every(v => ['Ws','Wt','We','Wc','Wd','Wpe','Wsp','Wsp-r'].includes(v));
-            const isAllJi = vals.every(v => ['Lu','Rl'].includes(v) || v === 'X' || v === 'Xn');
             const hasRl = vals.includes('Rl');
-            const hasArc = vals.some(v => v === 'X' || v === 'Xn');
-            const douCount = vals.filter(v => ['Ws','Wt','We','Wpe','Wsp','Wsp-r'].includes(v)).length;
-            const wcCount = vals.filter(v => ['Wc','Wd'].includes(v)).length;
-            const luCount = vals.filter(v => ['Lu','Wd'].includes(v)).length;
 
-            if (hasRl) return `判定为【逆思型R】，因为至少有1个反箕纹。反箕纹在任何手指出现都是逆思型，优先级最高。逆思型：反向思考，创意丰富，擅长找漏洞和另类解决方案。`;
-            if (isAllDou) {
-                if (thumbs.every(t => ['Ws','Wt','We','Wpe','Wsp','Wsp-r'].includes(t))) {
-                    return `判定为【超级认知型W】，因为10个手指全是斗形纹。超级认知型：唯我独尊，主见极强，择善固执，吃软不吃硬，适合做领导者或专家。`;
-                }
+            // ========== 第一步：逆思型优先（任何手指有Rl） ==========
+            if (hasRl) {
+                return `【逆思型 R】判定依据：10个手指中有反箕纹(Rl)。逆思型优先级最高，代表逆向思考、创意丰富、擅长找漏洞和另类解决方案。`;
             }
-            if (isAllJi && !hasRl) {
-                if (thumbs.every(t => ['Lu'].includes(t))) {
-                    return `判定为【超级模仿型L】，因为10个手指全不是斗形纹。超级模仿型：敞开即接纳，大公无私，奉献型，适合做教育者或服务者。`;
-                }
+
+            // ========== 第二步：以大拇指为基准，判定主性格方向 ==========
+            // 斗形纹(W)包括：Ws,Wt,We,Wc,Wd,Wpe,Wsp,Wsp-r
+            // 箕形纹(Lu/Rl)
+            // 弧形纹(X/Xn)
+            const isW = (v) => ['Ws','Wt','We','Wc','Wd','Wpe','Wsp','Wsp-r'].includes(v);
+            const isLu = (v) => v === 'Lu';
+            const isArc = (v) => v === 'X' || v === 'Xn';
+
+            const rtIsW = isW(rt), ltIsW = isW(lt);
+            const rtIsLu = isLu(rt), ltIsLu = isLu(lt);
+            const rtIsArc = isArc(rt), ltIsArc = isArc(lt);
+
+            const allW = vals.every(isW);
+            const allLu = vals.every(v => v === 'Lu');
+            const allArc = vals.every(isArc);
+            const douCount = vals.filter(isW).length;
+            const luCount = vals.filter(v => v === 'Lu').length;
+            const wcCount = vals.filter(v => ['Wc','Wd'].includes(v)).length;
+            const arcCount = vals.filter(isArc).length;
+
+            // --- 大拇指都是斗(W) → 认知型方向（不受双斗影响） ---
+            if (rtIsW && ltIsW) {
+                if (allW) return `【超级认知型 W】判定依据：两个大拇指都是斗形纹，且10个手指全是斗形纹。超级认知型：唯我独尊，主见极强，择善固执，吃软不吃硬，适合做领导者或专家。`;
+                if (douCount >= 6) return `【认知型 W】判定依据：两个大拇指都是斗形纹，且斗形纹数量占优势(${douCount}个)。认知型：主见权威，好奇心强，喜欢问为什么，以自我为中心。`;
+                // 斗不占绝对优势，但大拇指是斗 → 认知倾向（不受双斗影响）
+                return `【认知倾向 W】判定依据：两个大拇指都是斗形纹，但斗形纹不占绝对优势。有主见、好奇心强，但受其他纹型影响而有所中和。`;
             }
-            if (hasArc && thumbs.some(t => ['X','Xn'].includes(t))) {
-                return `判定为【开放型X】，因为大拇指是弧形纹或8个以上弧形纹。开放型：海绵式学习，照单全收，踏实肯干，依赖教养程度深。`;
+
+            // --- 大拇指都是箕(Lu) → 模仿型方向（不受双斗影响） ---
+            if (rtIsLu && ltIsLu) {
+                if (allLu) return `【超级模仿型 L】判定依据：两个大拇指都是大正箕，且10个手指全是大正箕。超级模仿型：敞开即接纳，大公无私，奉献型，适合做教育者或服务者。`;
+                if (luCount >= 6) return `【模仿型 L】判定依据：两个大拇指都是大正箕，且箕形纹数量占优势(${luCount}个)。模仿型：善于模仿，服从随和，适应性高，依赖环境和榜样。`;
+                // 箕不占绝对优势，但大拇指是箕 → 模仿倾向（不受双斗影响）
+                return `【模仿倾向 L】判定依据：两个大拇指都是大正箕，但箕形纹不占绝对优势。善于模仿和学习，但受其他纹型影响而有所中和。`;
             }
-            if (wcCount >= 2 && douCount >= 2) {
-                return `判定为【整合型WC】，因为双斗/双箕数量较多（${wcCount}个）。整合型：灵活善变，擅长资源整合，适应环境能力强，像变色龙。`;
+
+            // --- 大拇指都是弧(X/Xn) → 开放型方向 ---
+            if (rtIsArc && ltIsArc) {
+                return `【开放型 X】判定依据：两个大拇指都是弧形纹。开放型：海绵式学习，照单全收，踏实肯干，依赖教养程度深。`;
             }
-            if (douCount >= 4 && thumbs.some(t => ['Ws','Wt','We','Wpe','Wsp','Wsp-r'].includes(t))) {
-                return `判定为【认知型W】，因为斗形纹较多（${douCount}个）且大拇指为斗形。认知型：主见权威，好奇心强，喜欢问为什么，以自我为中心。`;
+
+            // --- 大拇指一斗一箕 → 整合型 ---
+            if ((rtIsW && ltIsLu) || (rtIsLu && ltIsW)) {
+                return `【整合型 WC】判定依据：两个大拇指一个是斗形纹、一个是箕形纹。整合型：灵活善变，擅长资源整合，适应环境能力强，像变色龙。`;
             }
-            if (luCount >= 4 && thumbs.some(t => ['Lu'].includes(t))) {
-                return `判定为【模仿型L】，因为正箕纹较多（${luCount}个）且大拇指为箕形。模仿型：善于模仿，服从随和，适应性高，依赖环境和榜样。`;
+
+            // --- 大拇指一弧一斗/箕 → 开放型或组合型 ---
+            if (rtIsArc || ltIsArc) {
+                if (arcCount >= 6) return `【开放型 X】判定依据：至少有一个大拇指是弧形纹，且弧形纹数量较多(${arcCount}个)。开放型：海绵式学习，踏实肯干。`;
+                return `【组合型】判定依据：大拇指一弧一斗/箕，且弧形纹不占绝对优势。综合特质较为多元，建议结合食指纹型进一步分析。`;
             }
-            return `判定为【组合型】，综合特征较为多元。建议关注大拇指纹型作为主性格方向，结合食指纹型辅助判断。`;
+
+            // ========== 兜底：组合型 ==========
+            return `【组合型】综合特征较为多元。建议关注大拇指纹型作为主性格方向，结合食指纹型辅助判断。`;
         }
 
         function analyzeTypeDisplay(sel) {
+            const rt = sel['right-thumb'], lt = sel['left-thumb'];
             const vals = Object.values(sel);
-            const thumbs = [sel['right-thumb'], sel['left-thumb']];
             const hasRl = vals.includes('Rl');
-            const arcCount = vals.filter(v => v === 'X' || v === 'Xn').length;
-            const douCount = vals.filter(v => ['Ws','Wt','We','Wpe','Wsp','Wsp-r'].includes(v)).length;
-            const wcCount = vals.filter(v => ['Wc','Wd'].includes(v)).length;
-            const luCount = vals.filter(v => ['Lu'].includes(v)).length;
 
+            // 工具函数
+            const isW = (v) => ['Ws','Wt','We','Wc','Wd','Wpe','Wsp','Wsp-r'].includes(v);
+            const isLu = (v) => v === 'Lu';
+            const isArc = (v) => v === 'X' || v === 'Xn';
+
+            const rtIsW = isW(rt), ltIsW = isW(lt);
+            const rtIsLu = isLu(rt), ltIsLu = isLu(lt);
+            const rtIsArc = isArc(rt), ltIsArc = isArc(lt);
+
+            const allW = vals.every(isW);
+            const allLu = vals.every(v => v === 'Lu');
+            const douCount = vals.filter(isW).length;
+            const luCount = vals.filter(v => v === 'Lu').length;
+            const wcCount = vals.filter(v => ['Wc','Wd'].includes(v)).length;
+            const arcCount = vals.filter(isArc).length;
+
+            // 1. 逆思型（最高优先级）
             if (hasRl) return { mainType: '🔄 逆思型 R', tagline: '逆向思考 · 创意非凡 · 与众不同' };
-            if (vals.every(v => ['Ws','Wt','We','Wc','Wd','Wpe','Wsp','Wsp-r'].includes(v)) && thumbs.every(t => ['Ws','Wt','We','Wpe','Wsp','Wsp-r'].includes(t))) return { mainType: '👑 超级认知型 W', tagline: '唯我独尊 · 领袖风范 · 王者之气' };
-            // Open type: thumb is arc OR 6+ arcs (check before super-mimic)
-            if (thumbs.some(t => t === 'X' || t === 'Xn') || arcCount >= 6) return { mainType: '🌊 开放型 X', tagline: '海绵学习 · 踏实肯干 · 简单极致' };
-            // Super mimic: all non-dou, no arcs in thumbs, mostly Lu
-            if (vals.every(v => v === 'Lu') && thumbs.every(t => t === 'Lu')) return { mainType: '💝 超级模仿型 L', tagline: '敞开接纳 · 大公无私 · 奉献型' };
-            if (wcCount >= 2 && douCount >= 2) return { mainType: '🎭 整合型 WC', tagline: '灵活善变 · 价值思维 · 多面高手' };
-            if (douCount >= 4 && thumbs.some(t => ['Ws','Wt','We','Wpe','Wsp','Wsp-r'].includes(t))) return { mainType: '🧠 认知型 W', tagline: '主见权威 · 好奇心强 · 探索型' };
-            if (luCount >= 6 && thumbs.some(t => t === 'Lu')) return { mainType: '🤝 模仿型 L', tagline: '善于模仿 · 适应力强 · 服务型' };
+
+            // 2. 两个大拇指都是斗(W) → 认知型方向
+            if (rtIsW && ltIsW) {
+                if (allW) return { mainType: '👑 超级认知型 W', tagline: '唯我独尊 · 领袖风范 · 王者之气' };
+                if (douCount >= 6) return { mainType: '🧠 认知型 W', tagline: '主见权威 · 好奇心强 · 探索型' };
+                // 斗不占绝对优势，但大拇指是斗 → 认知倾向（不受双斗影响）
+                return { mainType: '🧠 认知倾向 W', tagline: '有主见 · 好奇心 · 探索倾向' };
+            }
+
+            // 3. 两个大拇指都是箕(Lu) → 模仿型方向（优先级高于整合型）
+            if (rtIsLu && ltIsLu) {
+                if (allLu) return { mainType: '💝 超级模仿型 L', tagline: '敞开接纳 · 大公无私 · 奉献型' };
+                if (luCount >= 6) return { mainType: '🤝 模仿型 L', tagline: '善于模仿 · 适应力强 · 服务型' };
+                // 箕不占绝对优势，但大拇指是箕 → 模仿倾向（不受双斗影响）
+                return { mainType: '🤝 模仿倾向 L', tagline: '适应力强 · 善于学习 · 配合型' };
+            }
+
+            // 4. 两个大拇指都是弧(X/Xn) → 开放型
+            if (rtIsArc && ltIsArc) return { mainType: '🌊 开放型 X', tagline: '海绵学习 · 踏实肯干 · 简单极致' };
+
+            // 5. 大拇指一斗一箕 → 整合型
+            if ((rtIsW && ltIsLu) || (rtIsLu && ltIsW)) return { mainType: '🎭 整合型 WC', tagline: '灵活善变 · 价值思维 · 多面高手' };
+
+            // 6. 大拇指有弧纹 → 开放型或组合型
+            if (rtIsArc || ltIsArc) {
+                if (arcCount >= 6) return { mainType: '🌊 开放型 X', tagline: '海绵学习 · 踏实肯干 · 简单极致' };
+                return { mainType: '🎯 组合型', tagline: '多元特质 · 灵活应变 · 综合型' };
+            }
+
+            // 7. 兜底
             return { mainType: '🎯 组合型', tagline: '多元特质 · 灵活应变 · 综合型' };
         }
 
@@ -1060,13 +1124,13 @@ ${summary}
                 learning = '<p>📖 <strong>多样化输入</strong>最适合你。不要局限于一种学习方式——看书、看视频、动手做、讨论、教学他人，轮着来。<strong>跨学科学习</strong>：把不同领域的知识连接起来，你会产生独特的洞见。<strong>项目制</strong>：做一个需要多种技能的完整项目，比单一技能训练更有趣。</p>';
                 career = '<p>🎯 <strong>推荐方向：</strong>产品经理、咨询顾问、自媒体创作者、活动策划、创业者的联合创始人</p><p>这些角色需要整合多方资源、应对多变场景，正是你的舞台。</p>';
                 advice = '<p>💬 <strong>给家长的建议：</strong>整合型的孩子可能看起来"三分钟热度"。这不一定是坏事——他/她是在探索自己的可能性。<strong>支持探索但引导深入</strong>：允许尝试多种兴趣，但当找到真正喜欢的时，鼓励他/她坚持下去。</p>';
-            } else if (types.mainType.includes('认知型')) {
+            } else if (types.mainType.includes('认知')) {
                 talents = '好奇心强 · 主见权威 · 探索欲旺 · 自我驱动';
                 advantage = '<p>🌟 你是个小哲学家！斗形纹居多意味着你有<strong>强烈的好奇心和主见</strong>。"为什么"是你的口头禅，你不满足于表面答案，总想探究事物的本质。</p><p>💡 认知型的你喜欢思考和辩论。在讨论中，你不是为了赢，而是为了接近真理。你有自己的判断标准，不会轻易被说服——但如果你被说服了，那一定是因为对方真的有道理。</p>';
                 learning = '<p>📖 <strong>探究式学习</strong>最适合你。与其告诉你答案，不如引导你自己发现答案。<strong>深度阅读</strong>：你适合读有深度的书和文章，而不是碎片化信息。<strong>辩论和讨论</strong>：通过思想碰撞来深化理解。</p><p>⚠️ 注意：你可能有点"固执"。记住：承认错误不是软弱，而是更强大的表现。</p>';
                 career = '<p>🎯 <strong>推荐方向：</strong>研究员、工程师、教授/学者、分析师、科学记者、战略顾问</p><p>这些角色需要深度思考和持续探索，与你的天赋完美匹配。</p>';
                 advice = '<p>💬 <strong>给家长的建议：</strong>认知型的孩子需要<strong>被认真对待</strong>。当他/她问"为什么"时，不要敷衍——即使你不知道答案，也可以一起查找。<strong>尊重他/她的观点</strong>，即使与你不同。辩论是好事，说明孩子在思考。</p>';
-            } else if (types.mainType.includes('模仿型')) {
+            } else if (types.mainType.includes('模仿')) {
                 talents = '善于模仿 · 适应力强 · 团队配合 · 观察入微';
                 advantage = '<p>🌟 你是最好的队友！正箕纹居多意味着你有<strong>出色的模仿能力和团队适应性</strong>。你能快速学习和复制优秀的方法，也能敏锐感知团队的节奏和氛围。</p><p>💡 模仿型的你不是"没有创造力"——你的创造力体现在"改进"上。你能在吸收别人的优点后，加入自己的优化，做出更好的版本。这种能力在执行和运营工作中极为重要。</p>';
                 learning = '<p>📖 <strong>示范+练习</strong>最适合你。先看完整的示范（视频、演示），然后自己跟着做。<strong>找好榜样</strong>：身边有一个优秀的人参考，你的进步速度会惊人。<strong>反馈循环</strong>：做完后得到具体反馈，然后迭代改进。</p>';
