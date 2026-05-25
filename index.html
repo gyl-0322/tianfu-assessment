@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>AI皮纹天赋速测 · 免费体验</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <!-- QR Code: 使用服务端生成或文字URL -->
     <style>
@@ -1448,47 +1449,31 @@ ${fingerDetail}
                 ? WECHAT_SHORT_LINK
                 : 'https://www.aipiwen.cn';
             
-            // 方案1：尝试用 api.qrserver.com（国外用户）
-            try {
-                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(qrLink)}`;
-                const qrImg = new Image();
-                qrImg.crossOrigin = 'anonymous';
-                await new Promise((resolve, reject) => {
-                    qrImg.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        canvas.width = 80;
-                        canvas.height = 80;
-                        canvas.getContext('2d').drawImage(qrImg, 0, 0);
-                        qrDataUrl = canvas.toDataURL();
-                        resolve();
-                    };
-                    qrImg.onerror = () => reject(new Error('QR API failed'));
-                    qrImg.src = qrUrl;
+            // 用 qrcodejs 客户端生成二维码
+            await new Promise(resolve => {
+                const tmpDiv = document.createElement('div');
+                tmpDiv.style.cssText = 'position:fixed;left:-9999px;top:-9999px;width:80px;height:80px;';
+                document.body.appendChild(tmpDiv);
+                new QRCode(tmpDiv, {
+                    text: qrLink,
+                    width: 80,
+                    height: 80,
+                    colorDark: '#00ffe0',
+                    colorLight: '#0a0a2e',
+                    correctLevel: QRCode.CorrectLevel.L
                 });
-            } catch(e) {
-                console.warn('外部QR API失败，使用文字QR:', e);
-            }
-            
-            // 方案2：失败则生成"文字二维码"（样式化）
-            if (!qrDataUrl) {
-                const canvas = document.createElement('canvas');
-                canvas.width = 80;
-                canvas.height = 80;
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, 80, 80);
-                ctx.strokeStyle = '#00ffe0';
-                ctx.lineWidth = 2;
-                ctx.strokeRect(4, 4, 72, 72);
-                ctx.fillStyle = '#00ffe0';
-                ctx.font = '9px "PingFang SC", monospace';
-                ctx.textAlign = 'center';
-                ctx.fillText('扫码加微信', 40, 30);
-                ctx.fillText('或访问官网', 40, 45);
-                ctx.font = '7px monospace';
-                ctx.fillText('www.aipiwen.cn', 40, 68);
-                qrDataUrl = canvas.toDataURL();
-            }
+                setTimeout(() => {
+                    const canvas = tmpDiv.querySelector('canvas');
+                    if (canvas) {
+                        const c = document.createElement('canvas');
+                        c.width = 80; c.height = 80;
+                        c.getContext('2d').drawImage(canvas, 0, 0);
+                        qrDataUrl = c.toDataURL();
+                    }
+                    document.body.removeChild(tmpDiv);
+                    resolve();
+                }, 100);
+            });
             
             // 设置到海报
             document.getElementById('posterQR').src = qrDataUrl;
