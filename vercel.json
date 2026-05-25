@@ -3,11 +3,13 @@
   "builds": [
     { "src": "index.html", "use": "@vercel/static" },
     { "src": "api/generate.js", "use": "@vercel/node" },
-    { "src": "patterns/**", "use": "@vercel/static" }
+    { "src": "patterns/**", "use": "@vercel/static" },
+    { "src": "images/**", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/generate", "dest": "/api/generate.js" },
     { "src": "/patterns/(.*)", "dest": "/patterns/$1" },
+    { "src": "/images/(.*)", "dest": "/images/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
